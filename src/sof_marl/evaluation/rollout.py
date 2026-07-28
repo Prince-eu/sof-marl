@@ -139,17 +139,24 @@ def load_actors(state_dict_path: Path, cfg: Any) -> dict[str, nn.Module]:
     return actors
 
 
-def evaluate_rule_based(n_episodes: int, seed_base: int) -> list[EpisodeRecord]:
-    env = SMETreasuryEnv()
+def evaluate_rule_based(
+    n_episodes: int, seed_base: int, config_path: str = "config/env.yaml"
+) -> list[EpisodeRecord]:
+    env = SMETreasuryEnv(config_path=config_path)
     policy = RuleBasedPolicy()
     act_fn = make_rule_based_act_fn(policy)
     return [run_multiagent_episode(env, act_fn, seed_base + i) for i in range(n_episodes)]
 
 
 def evaluate_marl_policy(
-    models_dir: Path, policy_name: str, seeds: list[int], n_episodes: int, seed_base: int
+    models_dir: Path,
+    policy_name: str,
+    seeds: list[int],
+    n_episodes: int,
+    seed_base: int,
+    config_path: str = "config/env.yaml",
 ) -> dict[int, list[EpisodeRecord]]:
-    env = SMETreasuryEnv()
+    env = SMETreasuryEnv(config_path=config_path)
     out: dict[int, list[EpisodeRecord]] = {}
     for seed in seeds:
         actors = load_actors(models_dir / f"{policy_name}_seed{seed}_actors.pt", env.cfg)
@@ -159,12 +166,17 @@ def evaluate_marl_policy(
 
 
 def evaluate_single_agent(
-    models_dir: Path, seeds: list[int], n_episodes: int, seed_base: int
+    models_dir: Path,
+    seeds: list[int],
+    n_episodes: int,
+    seed_base: int,
+    config_path: str = "config/env.yaml",
+    model_stem: str = "single_agent_ppo",
 ) -> dict[int, list[EpisodeRecord]]:
     out: dict[int, list[EpisodeRecord]] = {}
     for seed in seeds:
-        env = SingleAgentTreasuryEnv()
-        model = PPO.load(str(models_dir / f"single_agent_ppo_seed{seed}.zip"))
+        env = SingleAgentTreasuryEnv(config_path=config_path)
+        model = PPO.load(str(models_dir / f"{model_stem}_seed{seed}.zip"))
         out[seed] = [run_single_agent_episode(env, model, seed_base + i) for i in range(n_episodes)]
     return out
 
@@ -176,25 +188,31 @@ def _episode_to_dict(record: EpisodeRecord) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/train.yaml")
+    parser.add_argument("--env-config", default="config/env.yaml")
+    parser.add_argument("--tag", default="", help="model/output suffix, e.g. 'stress'")
     args = parser.parse_args()
 
     train_cfg: dict[str, Any] = yaml.safe_load(Path(args.config).read_text())
     seeds: list[int] = train_cfg["seeds"]
     n_episodes: int = train_cfg["eval"]["n_episodes"]
     seed_base: int = train_cfg["eval"]["seed_base"]
+    env_config: str = args.env_config
+    suffix = f"_{args.tag}" if args.tag else ""
     models_dir = Path("data/processed/models")
     results_dir = Path("reports/results")
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Evaluating rule_based on {n_episodes} held-out episodes ...")
-    rule_based_episodes = evaluate_rule_based(n_episodes, seed_base)
-    (results_dir / "eval_episodes_rule_based.json").write_text(
+    print(f"Evaluating rule_based{suffix} on {n_episodes} held-out episodes ...")
+    rule_based_episodes = evaluate_rule_based(n_episodes, seed_base, env_config)
+    (results_dir / f"eval_episodes_rule_based{suffix}.json").write_text(
         json.dumps([_episode_to_dict(r) for r in rule_based_episodes], indent=2)
     )
 
-    print(f"Evaluating single_agent_ppo ({len(seeds)} seeds x {n_episodes} episodes) ...")
-    single_agent_episodes = evaluate_single_agent(models_dir, seeds, n_episodes, seed_base)
-    (results_dir / "eval_episodes_single_agent_ppo.json").write_text(
+    print(f"Evaluating single_agent_ppo{suffix} ({len(seeds)} seeds x {n_episodes} episodes) ...")
+    single_agent_episodes = evaluate_single_agent(
+        models_dir, seeds, n_episodes, seed_base, env_config, f"single_agent_ppo{suffix}"
+    )
+    (results_dir / f"eval_episodes_single_agent_ppo{suffix}.json").write_text(
         json.dumps(
             {
                 seed: [_episode_to_dict(r) for r in eps]
@@ -204,18 +222,22 @@ def main() -> int:
         )
     )
 
-    print(f"Evaluating ippo ({len(seeds)} seeds x {n_episodes} episodes) ...")
-    ippo_episodes = evaluate_marl_policy(models_dir, "ippo", seeds, n_episodes, seed_base)
-    (results_dir / "eval_episodes_ippo.json").write_text(
+    print(f"Evaluating ippo{suffix} ({len(seeds)} seeds x {n_episodes} episodes) ...")
+    ippo_episodes = evaluate_marl_policy(
+        models_dir, f"ippo{suffix}", seeds, n_episodes, seed_base, env_config
+    )
+    (results_dir / f"eval_episodes_ippo{suffix}.json").write_text(
         json.dumps(
             {seed: [_episode_to_dict(r) for r in eps] for seed, eps in ippo_episodes.items()},
             indent=2,
         )
     )
 
-    print(f"Evaluating mappo ({len(seeds)} seeds x {n_episodes} episodes) ...")
-    mappo_episodes = evaluate_marl_policy(models_dir, "mappo", seeds, n_episodes, seed_base)
-    (results_dir / "eval_episodes_mappo.json").write_text(
+    print(f"Evaluating mappo{suffix} ({len(seeds)} seeds x {n_episodes} episodes) ...")
+    mappo_episodes = evaluate_marl_policy(
+        models_dir, f"mappo{suffix}", seeds, n_episodes, seed_base, env_config
+    )
+    (results_dir / f"eval_episodes_mappo{suffix}.json").write_text(
         json.dumps(
             {seed: [_episode_to_dict(r) for r in eps] for seed, eps in mappo_episodes.items()},
             indent=2,
@@ -231,9 +253,10 @@ def main() -> int:
         ippo_episodes=ippo_episodes,
         mappo_episodes=mappo_episodes,
         cfg_path=args.config,
+        env_cfg_path=env_config,
     )
-    (results_dir / "eval_metrics.json").write_text(json.dumps(summary, indent=2))
-    print(f"Wrote eval_episodes_*.json and {results_dir / 'eval_metrics.json'}")
+    (results_dir / f"eval_metrics{suffix}.json").write_text(json.dumps(summary, indent=2))
+    print(f"Wrote eval_episodes_*{suffix}.json and {results_dir / f'eval_metrics{suffix}.json'}")
     return 0
 
 

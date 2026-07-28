@@ -47,11 +47,15 @@ class FirmValueLoggerCallback(BaseCallback):
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/train.yaml")
+    parser.add_argument("--env-config", default="config/env.yaml")
+    parser.add_argument("--tag", default="", help="output-file suffix, e.g. 'stress'")
     args = parser.parse_args()
 
     train_cfg: dict[str, Any] = yaml.safe_load(Path(args.config).read_text())
     seeds: list[int] = train_cfg["seeds"]
     ppo_cfg: dict[str, Any] = train_cfg["ppo"]
+    env_config: str = args.env_config
+    suffix = f"_{args.tag}" if args.tag else ""
 
     models_dir = Path("data/processed/models")
     models_dir.mkdir(parents=True, exist_ok=True)
@@ -61,9 +65,10 @@ def main() -> int:
     all_seed_results = []
     for seed in seeds:
         print(
-            f"[{POLICY_NAME}] seed {seed}: training for {ppo_cfg['total_timesteps']} timesteps ..."
+            f"[{POLICY_NAME}{suffix}] seed {seed}: "
+            f"training for {ppo_cfg['total_timesteps']} timesteps ..."
         )
-        env: Monitor = Monitor(SingleAgentTreasuryEnv())
+        env: Monitor = Monitor(SingleAgentTreasuryEnv(config_path=env_config))
         env.reset(seed=seed)
         model = PPO(
             "MlpPolicy",
@@ -85,8 +90,8 @@ def main() -> int:
         t0 = time.time()
         model.learn(total_timesteps=ppo_cfg["total_timesteps"], callback=callback)
         elapsed = time.time() - t0
-        print(f"[{POLICY_NAME}] seed {seed}: done in {elapsed:.1f}s")
-        model.save(str(models_dir / f"{POLICY_NAME}_seed{seed}"))
+        print(f"[{POLICY_NAME}{suffix}] seed {seed}: done in {elapsed:.1f}s")
+        model.save(str(models_dir / f"{POLICY_NAME}{suffix}_seed{seed}"))
 
         episode_rewards = env.get_episode_rewards()
         all_seed_results.append(
@@ -100,7 +105,7 @@ def main() -> int:
             }
         )
 
-    out_path = results_dir / f"learning_curve_{POLICY_NAME}.json"
+    out_path = results_dir / f"learning_curve_{POLICY_NAME}{suffix}.json"
     out_path.write_text(json.dumps(all_seed_results, indent=2))
     print(f"Wrote {out_path} and model weights to {models_dir}")
     return 0

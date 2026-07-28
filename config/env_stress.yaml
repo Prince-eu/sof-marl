@@ -1,0 +1,66 @@
+# PRE-REGISTERED STRESS SCENARIO E (docs/technical_report.md section 5.5).
+# Derived from config/env.yaml; only the five fields below differ. The scenario was
+# calibrated BLIND to the learned-policy ranking -- the harshness was set using only
+# the fixed rule-based heuristic as a reference, tuned to the regime where solvency
+# becomes a live constraint (rule-based breaches ~1 of 6 episodes) while the firm
+# remains fundamentally survivable. Sourced/annotated comments for all unchanged
+# constants live in config/env.yaml (this file is machine-generated, so they are
+# not duplicated here).
+#
+# Deltas from baseline (config/env.yaml):
+#   revenue.annual_mean        1_200_000 -> 840_000   (-30%: a sharp downturn)
+#   revenue.weekly_sigma_frac  0.15      -> 0.50      (elevated cash-flow volatility)
+#   expenses.fixed_weekly_frac 0.55      -> 0.72      (operating leverage: fixed costs
+#                                                      a larger share of lower revenue)
+#   initial.cash               80_000    -> 20_000    (thin starting buffer)
+#   credit_line.limit          100_000   -> 15_000    (bank credit tightened in a downturn)
+horizon_weeks: 52
+sba:
+  dataset_page: https://data.sba.gov/en/dataset/7-a-504-foia
+  csv_url: https://data.sba.gov/sites/default/files/uploaded_resources/FOIA_7a_FY2010_FY2019_asof_260331.csv
+  raw_path: data/raw/sba_7a.csv
+  processed_dir: data/processed
+  fit_fy_max: 2015
+  calib_fy_max: 2017
+initial:
+  cash: 20000
+  reserve: 20000
+  invested: 0
+  accounts_receivable: 90000
+  accounts_payable: 60000
+  term_debt: 120000
+  credit_drawn: 0
+ar_aging_init:
+- 0.6
+- 0.3
+- 0.1
+revenue:
+  annual_mean: 840000
+  weekly_sigma_frac: 0.5
+  seasonal_amplitude: 0.2
+expenses:
+  fixed_weekly_frac: 0.72
+  discretionary_weekly_frac: 0.15
+credit_line:
+  limit: 15000
+  apr: 0.11
+term_debt_apr: 0.09
+late_payment_penalty_apr: 0.24
+buffer_days_target: 27
+collection_curve:
+- 0.5
+- 0.35
+- 0.15
+bad_debt_frac: 0.01
+credit_exposure_pool_size: 50
+exposure_resolution_weeks: 12
+early_pay_discount_frac: 0.02
+investment_return:
+  weekly_mean: 0.0015
+  weekly_sigma: 0.01
+ap_schedule_weeks: 2
+credit_exposure_scale_frac: 0.02
+loss_given_default_frac: 0.6
+max_pending_credit_requests: 4
+ops_health_target_spend_rate: 0.5
+ops_health_adjustment_rate: 0.1

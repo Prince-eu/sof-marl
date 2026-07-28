@@ -36,11 +36,15 @@ SHARED_REWARD_WEIGHT = 0.0
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/train.yaml")
+    parser.add_argument("--env-config", default="config/env.yaml")
+    parser.add_argument("--tag", default="", help="output-file suffix, e.g. 'stress'")
     args = parser.parse_args()
 
     train_cfg: dict[str, Any] = yaml.safe_load(Path(args.config).read_text())
     seeds: list[int] = train_cfg["seeds"]
     hp = load_ppo_hyperparameters(args.config)
+    env_config: str = args.env_config
+    suffix = f"_{args.tag}" if args.tag else ""
 
     models_dir = Path("data/processed/models")
     models_dir.mkdir(parents=True, exist_ok=True)
@@ -49,10 +53,12 @@ def main() -> int:
 
     all_seed_results = []
     for seed in seeds:
-        print(f"[{POLICY_NAME}] seed {seed}: training for {hp.total_timesteps} timesteps ...")
+        print(
+            f"[{POLICY_NAME}{suffix}] seed {seed}: training for {hp.total_timesteps} timesteps ..."
+        )
         t0 = time.time()
         result = train_multi_agent_ppo(
-            env_factory=SMETreasuryEnv,
+            env_factory=lambda: SMETreasuryEnv(config_path=env_config),
             centralized_critic=CENTRALIZED_CRITIC,
             shared_reward_weight=SHARED_REWARD_WEIGHT,
             seed=seed,
@@ -60,16 +66,16 @@ def main() -> int:
         )
         elapsed = time.time() - t0
         print(
-            f"[{POLICY_NAME}] seed {seed}: done in {elapsed:.1f}s, "
+            f"[{POLICY_NAME}{suffix}] seed {seed}: done in {elapsed:.1f}s, "
             f"{result['total_timesteps']} steps"
         )
 
         actor_state = {agent: result["actors"][agent].state_dict() for agent in AGENT_NAMES}
-        torch.save(actor_state, models_dir / f"{POLICY_NAME}_seed{seed}_actors.pt")
+        torch.save(actor_state, models_dir / f"{POLICY_NAME}{suffix}_seed{seed}_actors.pt")
         critic_model = result["critic_model"]
         assert isinstance(critic_model, IndependentCritics)
         critic_state = {agent: c.state_dict() for agent, c in critic_model.critics.items()}
-        torch.save(critic_state, models_dir / f"{POLICY_NAME}_seed{seed}_critics.pt")
+        torch.save(critic_state, models_dir / f"{POLICY_NAME}{suffix}_seed{seed}_critics.pt")
 
         all_seed_results.append(
             {
@@ -80,7 +86,7 @@ def main() -> int:
             }
         )
 
-    out_path = results_dir / f"learning_curve_{POLICY_NAME}.json"
+    out_path = results_dir / f"learning_curve_{POLICY_NAME}{suffix}.json"
     out_path.write_text(json.dumps(all_seed_results, indent=2))
     print(f"Wrote {out_path} and model weights to {models_dir}")
     return 0
