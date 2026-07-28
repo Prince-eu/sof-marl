@@ -1,0 +1,40 @@
+# SOF-MARL pinned dependencies (Python 3.11).
+# This set is the lean MARL path: Stable-Baselines3 + PettingZoo for the
+# single-agent baseline, and a self-contained PyTorch multi-agent PPO trainer
+# (src/sof_marl/training/) serving both IPPO and MAPPO. Ray/RLlib is intentionally
+# NOT included. SuperSuit was dropped (see CLAUDE.md's amended locked decision):
+# its parameter-sharing requires identical obs/action spaces across all agents,
+# which this environment's four heterogeneous agents cannot satisfy by design.
+#
+# Before building, run `pip install -r requirements.txt` in a fresh venv and confirm
+# the resolver succeeds. SB3 2.3.x targets Gymnasium 0.29.x. If a conflict appears,
+# resolve it and record the final working versions here (do not float unpinned).
+
+# --- core numerics / data ---
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1
+
+# --- credit-risk model ---
+scikit-learn==1.5.1
+xgboost==2.1.1
+shap==0.46.0
+
+# --- RL / multi-agent ---
+torch==2.3.1
+gymnasium==0.29.1
+pettingzoo==1.24.3
+stable-baselines3==2.3.2
+
+# --- config / io / plotting ---
+pyyaml==6.0.2
+pydantic==2.8.2
+matplotlib==3.9.2
+requests==2.32.3
+
+# --- dev tooling ---
+pytest==8.3.2
+ruff==0.6.2
+black==24.8.0
+mypy==1.11.2
+types-PyYAML==6.0.12.20260518

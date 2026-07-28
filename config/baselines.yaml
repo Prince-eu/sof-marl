@@ -1,0 +1,29 @@
+# Rule-based treasury baseline (docs/ARCHITECTURE.md section 6.1).
+# EVALUATION.md section 1: "a weak baseline is the most common way a POC like this
+# loses credibility. The rule-based policy must be one a competent treasurer would
+# actually use." Every parameter here is a deliberate, documented policy choice, not
+# a magic number, and is not tuned against any evaluation result.
+
+rule_based:
+  # Use the calibrated buffer anchor as-is (config/env.yaml buffer_days_target),
+  # neither padding it nor running it down.
+  target_buffer_frac: 1.0
+
+  # Approve a pending exposure if the Phase-A model's predicted default probability
+  # is below this cutoff; deny otherwise (no premium tier -- a single fixed
+  # threshold is what a treasurer without a full risk-pricing model would run).
+  # Roughly 1.5x the held-out test portfolio's real base rate (9.74%,
+  # reports/results/credit_metrics.json test_default_rate) -- a conservative but
+  # usable single cutoff; assumption, sensitivity-tested.
+  credit_risk_cutoff: 0.15
+
+  # Fixed surplus split: pay down debt first, then build reserve, then invest --
+  # a conventional conservative treasury ordering (debt service before
+  # discretionary investment); assumption.
+  capital_allocation_split: [0.5, 0.3, 0.2]
+
+  # Steady discretionary spend at the calibrated ops-health target rate
+  # (config/env.yaml ops_health_target_spend_rate), split evenly between
+  # essential-adjacent and deferrable categories.
+  spend_now_frac: 0.5
+  essential_bias: 0.5

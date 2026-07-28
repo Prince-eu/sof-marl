@@ -1,0 +1,46 @@
+# Per-agent action spaces and reward shaping weights. See docs/ARCHITECTURE.md
+# section 4. The combined-objective weights live in config/train.yaml, not here;
+# these are per-agent training knobs.
+
+liquidity:
+  actions:                              # bounded continuous, scaled inside the env
+    target_buffer_frac: [0.0, 2.0]      # multiple of buffer_days_target
+    credit_draw_frac: [-1.0, 1.0]       # negative = repay, positive = draw (of headroom)
+    defer_payables_frac: [0.0, 1.0]
+    accelerate_receivables_frac: [0.0, 1.0]
+  rewards:
+    w_shortfall: 1.0
+    w_financing_cost: 0.3
+    w_idle_cash: 0.05
+    w_late_payment: 0.5
+
+credit_risk:
+  actions: [deny, approve, approve_with_premium]   # discrete, per pending exposure
+  premium_bps: 300
+  rewards:
+    margin_bps: 250
+    w_loss_given_default: 1.0
+    w_concentration: 0.2
+
+expenditure:
+  actions:
+    spend_now_frac: [0.0, 1.0]
+    essential_bias: [0.0, 1.0]
+  rewards:
+    value_scale: 1.0
+    diminishing_returns_k: 0.5
+    w_over_deferral: 0.4
+
+capital_allocation:
+  actions:
+    allocation_simplex: [debt_paydown, reserve, investment]   # softmax over 3
+  rewards:
+    w_return: 1.0
+    w_interest_saved: 1.0
+    w_liquidity_risk: 0.5
+
+shared:
+  # R_shared = alpha*firm_value_change - beta*solvency_breach_indicator
+  # Added to each agent as lambda_shared*R_shared (config/train.yaml mappo.shared_reward_weight).
+  alpha_firm_value: 1.0
+  beta_solvency_breach: 3.0             # mirrors the solvency priority in the objective

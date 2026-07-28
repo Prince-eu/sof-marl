@@ -1,0 +1,55 @@
+# Training and evaluation configuration.
+# The combined objective and its weights are PRE-REGISTERED. Do not tune them to
+# results. See docs/EVALUATION.md and docs/technical_report.md section 4.2.
+
+objective:
+  # Combined objective (headline):  J = r - kappa*s - lambda*B
+  #   r      = (V_52 - V_0) / V_0                 # annual return on firm value
+  #   s      = stdev(weekly change in V) / V_0    # normalized path volatility
+  #   B      = weeks_with_uncovered_shortfall / 52
+  # Balanced posture: solvency > return > volatility.
+  lambda_solvency: 3.0
+  kappa_volatility: 1.0
+  # Financing cost is a reported diagnostic, NOT a term in J (already inside V_52).
+
+# Reproducibility
+seeds: [0, 1, 2, 3, 4]        # >= 5 training seeds per learned policy
+eval:
+  n_episodes: 100             # shared, held-out evaluation episodes
+  seed_base: 100000           # eval seeds disjoint from training seeds
+  deterministic: true         # greedy actions at evaluation
+
+# Policies to run (all evaluated on the same episodes)
+policies: [rule_based, single_agent_ppo, ippo, mappo]
+
+# PPO / MARL hyperparameters (POC-scale; document any change in the report).
+# vf_coef and max_grad_norm are the standard PPO-paper/SB3 defaults, not tuned.
+ppo:
+  total_timesteps: 1000000    # per learned policy per seed; raise if unconverged, record it
+  n_steps: 2048
+  batch_size: 256
+  gamma: 0.99
+  gae_lambda: 0.95
+  learning_rate: 3.0e-4
+  clip_range: 0.2
+  ent_coef: 0.0
+  n_epochs: 10
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy: MlpPolicy
+
+mappo:
+  # Compact custom PPO trainer (PyTorch, src/sof_marl/training/multi_agent_ppo.py).
+  # Each of the four heterogeneous agents keeps its own actor (see CLAUDE.md's
+  # amended locked decision); MAPPO's "centralized" part is the critic, which
+  # is one network over the joint (concatenated) observation with a per-agent
+  # output head, instead of IPPO's four independent per-agent critics.
+  centralized_critic: true
+  shared_reward_weight: 1.0   # lambda_shared in ARCHITECTURE.md section 4.5 (>0 = coordinated)
+  # IPPO uses the same trainer with centralized_critic=False and shared_reward_weight=0.
+
+# Statistical test for the coordination lift
+significance:
+  test: wilcoxon_signed_rank  # paired across evaluation episodes
+  alpha: 0.05
+  report_effect_size: true
