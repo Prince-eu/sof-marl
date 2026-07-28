@@ -18,6 +18,7 @@ scipy==1.13.1
 # --- credit-risk model ---
 scikit-learn==1.5.1
 xgboost==2.1.1
+lifelines==0.30.3          # censoring-aware concordance index for the survival reframe
 shap==0.46.0
 
 # --- RL / multi-agent ---

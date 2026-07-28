@@ -23,9 +23,13 @@ forecasting, credit-risk assessment, expenditure optimization, and capital alloc
 The credit-risk function is grounded in a supervised model trained on the U.S. Small
 Business Administration (SBA) 7(a) public loan-outcome dataset, which achieves a
 held-out ROC-AUC of 0.939 (95% CI 0.936-0.942); we investigated this figure precisely
-because it is unusually high, traced it to a structural property of the labeled data
-(section 5.1), and also report the more conservative 0.622 that the identical pipeline
-achieves when the implicated feature is removed. The four functions operate as
+because it is unusually high, found its discrimination concentrated in loan
+term/structure (removing that feature drops the AUC to 0.622), and cross-checked it
+with a survival-analysis reframe that puts the snapshot's previously-excluded active
+loans back in as right-censored observations -- which leaves discrimination essentially
+unchanged (concordance index 0.928), indicating the strong performance is not primarily
+a resolved-loan selection artifact, though it remains term-concentrated (section 5.1).
+The four functions operate as
 cooperating agents in a treasury environment calibrated to public U.S. small-business
 statistics. We compare four control policies on identical, held-out evaluation
 episodes: a rule-based heuristic, a single-agent controller, independent multi-agent RL
@@ -293,6 +297,45 @@ performance on this specific point-in-time-resolved-loan task, not as a general
 forward-looking underwriting AUC for loans of arbitrary, not-yet-observed duration.
 We report both numbers rather than picking one, per the reproducibility and
 honest-reporting requirements in `docs/EVALUATION.md`.
+
+**Survival-analysis reframe (methodological robustness check;
+`src/sof_marl/credit/survival.py`).** The hypothesis above -- that the 0.939 AUC is
+inflated by the resolved-loan-only construction (active loans excluded) -- is testable
+with the statistically correct treatment: survival analysis with right-censoring,
+which lets us put the excluded loans back in. The FOIA file's `EXEMPT` loans
+(disbursed but not yet resolved as of the snapshot) are exactly the active loans the
+binary classifier dropped, and they are right-censored observations (survived without
+charge-off up to the snapshot). We built a survival dataset -- charge-off as the event;
+paid-in-full and active (`EXEMPT`) loans right-censored (prepayment treated as
+non-informative censoring, a standard simplification; full competing-risks modeling of
+prepayment vs. default is future work) -- fit an XGBoost accelerated-failure-time model
+on the earlier cohort (approval FY <= 2017, n=379,087, 26,639 charge-off events), and
+evaluated Harrell's concordance index (the censoring-aware analog of ROC-AUC) on the
+same later held-out cohort (FY 2018-2019, n=99,862, 7,034 events).
+
+The result **refines rather than confirms** the selection-artifact hypothesis. The
+held-out concordance index is **0.928 (95% CI 0.925-0.930)** -- essentially unchanged
+from the binary 0.939. Putting the previously-excluded active loans back in, as proper
+censored observations, does *not* reduce discrimination, so the strong performance is
+not, after all, primarily an artifact of the resolved-loan-only selection. What
+persists in both framings is `term_months` dependence: removing it collapses the
+concordance index to 0.655 (mirroring the binary classifier's 0.622), so the model's
+discriminative power remains concentrated in loan term and structure regardless of
+framing. Figure 2b shows this is nonetheless real charge-off discrimination, not only
+resolution timing: stratifying the held-out loans into quartiles by the model's
+predicted risk, the highest-risk quartile falls to ~48% survival (i.e. ~52% cumulative
+charge-off) by 100 months, against near-100% survival for the lowest-risk quartile. The
+honest net reading: the credit model's discrimination is strong and robust to the
+censoring correction, but term-concentrated; separating how much of the term signal is
+forward-looking default risk versus residual term-correlated prepayment/resolution
+timing would require loan-level competing-risks modeling beyond this POC. As throughout,
+we report the concordance index with its term ablation rather than a single tidy number.
+
+![Figure 2b: held-out survival by model-predicted risk quartile](figures/credit_survival_km.png)
+
+Figure 2b (`reports/figures/credit_survival_km.png`): Kaplan-Meier survival curves for
+the held-out cohort, stratified into quartiles by the survival model's predicted risk.
+Clear separation across risk quartiles on real, censored SBA 7(a) data.
 
 ### 5.2 Treasury environment and baseline behavior
 The rule-based heuristic (Appendix B) is a credible, non-strawman baseline, not a

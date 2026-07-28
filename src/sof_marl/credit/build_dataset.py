@@ -90,16 +90,13 @@ def load_raw(raw_path: Path) -> pd.DataFrame:
     return pd.read_csv(raw_path, usecols=RAW_USECOLS, low_memory=False)
 
 
-def build_features(raw: pd.DataFrame) -> pd.DataFrame:
-    """Filter to resolved loans and engineer the leakage-checked feature table."""
-    df = raw[raw["loanstatus"].isin(RESOLVED_STATUS_LABELS)].copy()
-    # naicscode and jobssupported are each missing on a handful of rows (4 total in
-    # the FY2010-FY2019 snapshot); drop rather than impute a systemic risk field.
-    df = df.dropna(subset=["naicscode", "jobssupported"])
-
+def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Engineer the leakage-checked numeric + one-hot feature table from an
+    already-filtered raw frame (no label/target). Shared by the binary
+    classifier (build_features) and the survival model (credit/survival.py) so
+    both use an identical feature set.
+    """
     out = pd.DataFrame(index=df.index)
-    out[LABEL_COLUMN] = df["loanstatus"].map(RESOLVED_STATUS_LABELS).astype("int8")
-
     out["gross_approval"] = df["grossapproval"].astype("float64")
     out["sba_guaranteed_approval"] = df["sbaguaranteedapproval"].astype("float64")
     out["sba_guaranty_pct"] = out["sba_guaranteed_approval"] / out["gross_approval"]
@@ -127,8 +124,19 @@ def build_features(raw: pd.DataFrame) -> pd.DataFrame:
     dummies = pd.get_dummies(
         out[CATEGORICAL_SOURCE_COLUMNS], prefix=CATEGORICAL_SOURCE_COLUMNS, dtype="int8"
     )
-    out = pd.concat([out.drop(columns=CATEGORICAL_SOURCE_COLUMNS), dummies], axis=1)
-    return out
+    return pd.concat([out.drop(columns=CATEGORICAL_SOURCE_COLUMNS), dummies], axis=1)
+
+
+def build_features(raw: pd.DataFrame) -> pd.DataFrame:
+    """Filter to resolved loans and build the labeled binary-classifier table."""
+    df = raw[raw["loanstatus"].isin(RESOLVED_STATUS_LABELS)].copy()
+    # naicscode and jobssupported are each missing on a handful of rows (4 total in
+    # the FY2010-FY2019 snapshot); drop rather than impute a systemic risk field.
+    df = df.dropna(subset=["naicscode", "jobssupported"])
+
+    features = engineer_features(df)
+    label = df["loanstatus"].map(RESOLVED_STATUS_LABELS).astype("int8").rename(LABEL_COLUMN)
+    return pd.concat([label, features], axis=1)
 
 
 def feature_columns(df: pd.DataFrame) -> list[str]:

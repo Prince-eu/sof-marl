@@ -1,0 +1,65 @@
+{
+  "n_train": 379087,
+  "n_test": 99862,
+  "n_events_train": 26639,
+  "n_events_test": 7034,
+  "n_features": 132,
+  "train_fy_max": 2017,
+  "concordance_index": 0.9276494033264496,
+  "concordance_index_ci": [
+    0.9254134039314409,
+    0.9295719479612667
+  ],
+  "concordance_index_without_term_months": 0.6548921975955998,
+  "term_months_gain_share": 0.13691926453622522,
+  "top_features_by_gain": [
+    {
+      "feature": "term_months",
+      "gain": 136.32118225097656
+    },
+    {
+      "feature": "processing_method_SBA Express Program",
+      "gain": 80.48455810546875
+    },
+    {
+      "feature": "sba_guaranty_pct",
+      "gain": 53.394752502441406
+    },
+    {
+      "feature": "processing_method_7a with EWCP",
+      "gain": 42.434879302978516
+    },
+    {
+      "feature": "processing_method_Community Express",
+      "gain": 33.59489440917969
+    },
+    {
+      "feature": "processing_method_Preferred Lenders with EWCP",
+      "gain": 27.377656936645508
+    },
+    {
+      "feature": "initial_interest_rate",
+      "gain": 23.647714614868164
+    },
+    {
+      "feature": "revolver_status",
+      "gain": 23.361833572387695
+    }
+  ],
+  "n_bootstrap": 300,
+  "aft_params": {
+    "objective": "survival:aft",
+    "eval_metric": "aft-nloglik",
+    "aft_loss_distribution": "normal",
+    "aft_loss_distribution_scale": 1.2,
+    "tree_method": "hist",
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 5,
+    "reg_lambda": 1.0,
+    "seed": 0
+  },
+  "included_exempt_as_censored": true
+}
