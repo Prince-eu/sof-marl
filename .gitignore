@@ -15,3 +15,6 @@ data/processed/*
 *.ckpt
 *.pt
 wandb/
+
+# macOS Finder metadata
+.DS_Store
