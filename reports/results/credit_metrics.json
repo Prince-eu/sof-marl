@@ -1,0 +1,129 @@
+{
+  "n_fit": 255904,
+  "n_calib": 97250,
+  "n_test": 72221,
+  "n_features": 132,
+  "fit_default_rate": 0.07176910091284232,
+  "calib_default_rate": 0.08513110539845758,
+  "test_default_rate": 0.09743703354979853,
+  "hyperparameter_grid_results": [
+    {
+      "max_depth": 4,
+      "learning_rate": 0.03,
+      "cv_roc_auc_mean": 0.9641350208311538,
+      "cv_roc_auc_std": 0.0009367226030115421
+    },
+    {
+      "max_depth": 4,
+      "learning_rate": 0.1,
+      "cv_roc_auc_mean": 0.9681793251873635,
+      "cv_roc_auc_std": 0.0007594575939636059
+    },
+    {
+      "max_depth": 6,
+      "learning_rate": 0.03,
+      "cv_roc_auc_mean": 0.9683719977866637,
+      "cv_roc_auc_std": 0.0008166356047961857
+    },
+    {
+      "max_depth": 6,
+      "learning_rate": 0.1,
+      "cv_roc_auc_mean": 0.9693985293582387,
+      "cv_roc_auc_std": 0.0007153736214945885
+    },
+    {
+      "max_depth": 8,
+      "learning_rate": 0.03,
+      "cv_roc_auc_mean": 0.9698118592672188,
+      "cv_roc_auc_std": 0.0007544162850132822
+    },
+    {
+      "max_depth": 8,
+      "learning_rate": 0.1,
+      "cv_roc_auc_mean": 0.9693296963034225,
+      "cv_roc_auc_std": 0.0006170360017615138
+    }
+  ],
+  "selected_hyperparameters": {
+    "n_estimators": 400,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 5,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "n_jobs": -1,
+    "eval_metric": "auc",
+    "random_state": 0,
+    "max_depth": 8,
+    "learning_rate": 0.03
+  },
+  "metrics_test_calibrated": {
+    "roc_auc": {
+      "value": 0.9392978849906123,
+      "ci_low": 0.9362120687600113,
+      "ci_high": 0.9424945346628562
+    },
+    "pr_auc": {
+      "value": 0.6962955474702255,
+      "ci_low": 0.6841315126603519,
+      "ci_high": 0.7086012063149376
+    },
+    "brier_score": {
+      "value": 0.04483615122162343,
+      "ci_low": 0.04381287988602348,
+      "ci_high": 0.04604593208366905
+    }
+  },
+  "term_months_sensitivity": {
+    "roc_auc_excluding_term_months": {
+      "value": 0.6222675942345284,
+      "ci_low": 0.615602292357545,
+      "ci_high": 0.628864359949376
+    },
+    "note": "term_months alone accounts for the majority of the headline model's discriminative power (see docs/technical_report.md 5.1/7): excluding it and refitting the identical pipeline drops ROC-AUC to the value above. This is a known characteristic of resolved-loan-only FOIA snapshots, where long-duration loans are structurally under-represented among observed defaults because most have not yet reached natural maturity.",
+    "term_bucket_default_rates_all_splits": [
+      {
+        "term_months_range": "(0, 12]",
+        "default_rate": 0.37332073887489503,
+        "n": 9528
+      },
+      {
+        "term_months_range": "(12, 36]",
+        "default_rate": 0.33229829736583344,
+        "n": 19323
+      },
+      {
+        "term_months_range": "(36, 60]",
+        "default_rate": 0.1261738578680203,
+        "n": 63040
+      },
+      {
+        "term_months_range": "(60, 84]",
+        "default_rate": 0.04607880888204338,
+        "n": 148029
+      },
+      {
+        "term_months_range": "(84, 120]",
+        "default_rate": 0.06286417497179829,
+        "n": 107263
+      },
+      {
+        "term_months_range": "(120, 180]",
+        "default_rate": 0.03111375346809354,
+        "n": 20184
+      },
+      {
+        "term_months_range": "(180, 240]",
+        "default_rate": 0.057173295454545456,
+        "n": 11264
+      },
+      {
+        "term_months_range": "(240, 400]",
+        "default_rate": 0.016056229043074542,
+        "n": 46524
+      }
+    ]
+  },
+  "n_bootstrap": 1000,
+  "random_seed": 0
+}

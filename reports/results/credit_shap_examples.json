@@ -1,0 +1,112 @@
+{
+  "high_risk": {
+    "predicted_probability": 0.9917311072349548,
+    "top_contributions": [
+      {
+        "feature": "term_months",
+        "shap_value": 2.592041492462158,
+        "feature_value": 57.0
+      },
+      {
+        "feature": "borrower_state_FL",
+        "shap_value": 0.4327079653739929,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "processing_method_SBA Express Program",
+        "shap_value": 0.21830390393733978,
+        "feature_value": 0.0
+      },
+      {
+        "feature": "sba_guaranty_pct",
+        "shap_value": 0.20973820984363556,
+        "feature_value": 0.75
+      },
+      {
+        "feature": "initial_interest_rate",
+        "shap_value": 0.19981461763381958,
+        "feature_value": 7.0
+      },
+      {
+        "feature": "sba_guaranteed_approval",
+        "shap_value": 0.18480248749256134,
+        "feature_value": 320250.0
+      },
+      {
+        "feature": "approval_fy",
+        "shap_value": 0.17033997178077698,
+        "feature_value": 2018.0
+      },
+      {
+        "feature": "naics_sector_72",
+        "shap_value": 0.1341836303472519,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "business_age_Startup, Loan Funds will Open Business",
+        "shap_value": 0.10937744379043579,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "gross_approval",
+        "shap_value": 0.10318789631128311,
+        "feature_value": 427000.0
+      }
+    ]
+  },
+  "low_risk": {
+    "predicted_probability": 0.000394988659536466,
+    "top_contributions": [
+      {
+        "feature": "term_months",
+        "shap_value": -5.954682350158691,
+        "feature_value": 300.0
+      },
+      {
+        "feature": "naics_sector_52",
+        "shap_value": -0.7498971819877625,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "initial_interest_rate",
+        "shap_value": -0.5203033685684204,
+        "feature_value": 5.35
+      },
+      {
+        "feature": "approval_fy",
+        "shap_value": 0.24052245914936066,
+        "feature_value": 2018.0
+      },
+      {
+        "feature": "fixed_or_variable_F",
+        "shap_value": -0.17272856831550598,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "business_age_Existing, 5 or more years",
+        "shap_value": -0.14533303678035736,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "gross_approval",
+        "shap_value": -0.14293262362480164,
+        "feature_value": 625000.0
+      },
+      {
+        "feature": "collateral_ind",
+        "shap_value": -0.09763672947883606,
+        "feature_value": 1.0
+      },
+      {
+        "feature": "fixed_or_variable_V",
+        "shap_value": -0.06568475067615509,
+        "feature_value": 0.0
+      },
+      {
+        "feature": "business_age_Less than 4 years old but at least 3",
+        "shap_value": -0.06281563639640808,
+        "feature_value": 0.0
+      }
+    ]
+  }
+}
