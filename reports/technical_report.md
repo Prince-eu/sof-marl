@@ -30,18 +30,22 @@ cooperating agents in a treasury environment calibrated to public U.S. small-bus
 statistics. We compare four control policies on identical, held-out evaluation
 episodes: a rule-based heuristic, a single-agent controller, independent multi-agent RL
 (IPPO), and coordinated multi-agent RL (MAPPO). Coordinated control (MAPPO) increased
-the pre-registered combined treasury objective by 9.45-9.51 relative to every other
+the pre-registered combined treasury objective by 8.97-9.22 relative to every other
 policy (mean over 5 training seeds, 100 shared evaluation episodes, paired Wilcoxon
 signed-rank p < 0.001 for all three comparisons), and the qualitative result was
 unchanged across six perturbations of three consequential calibration constants
 (section 5.4). No policy, including the rule-based baseline, breached solvency in any
-evaluation episode. We also report an important, non-obvious limitation we identified
-by directly probing the trained networks: the credit-risk agent converged to denying
-essentially every exposure under all three learned policies, so the measured MAPPO
-advantage is attributable to the other three agents coordinating well, not to better
-credit decisions (sections 5.3, 7). We report interpretability (SHAP) for the credit
-model, the sensitivity analysis, this and other limitations, and a full
-reproducibility statement.
+evaluation episode. We also document an engineering iteration that strengthens the
+result: in an initial run the credit-risk agent collapsed to denying essentially every
+exposure; we diagnosed the cause (a miscalibrated concentration penalty plus a delayed,
+swamped reward), redesigned the credit reward, and retrained, after which the credit
+agent learns a sensible risk threshold and the learned policies run credit books more
+profitable than the rule-based baseline (approval precision ~0.97, portfolio yield net
+of losses roughly double the baseline's; sections 5.3, 7). Because the credit exposures
+are small-scale relative to the balance sheet, the MAPPO coordination advantage is
+driven mainly by the liquidity and capital-allocation agents, which we state plainly.
+We report interpretability (SHAP) for the credit model, the sensitivity analysis, this
+and other limitations, and a full reproducibility statement.
 
 ---
 
@@ -83,10 +87,11 @@ spaces and rewards, and the credit-exposure integration -- lives in
 - **Agents.** Liquidity forecasting, credit-risk assessment, expenditure
   optimization, capital allocation. Each has a defined observation slice, action
   space, and reward, and each was trained (not simplified or scripted) under all
-  three learned policies. All four converged to non-trivial behavior except the
-  credit-risk agent, which converged to a near-constant deny decision under every
-  learned policy -- a genuine training result, not a simplification we chose; see
-  section 5.3 and section 7.
+  three learned policies. All four converge to non-trivial behavior. The credit-risk
+  agent did so only after a reward redesign: in an initial run it collapsed to
+  always-deny, which we diagnosed and fixed (immediate expected-value shaping +
+  threshold concentration penalty; sections 4.2, 5.3, 7), after which it learns a
+  sensible risk threshold.
 - **Coordination.** A shared firm-level reward plus a centralized critic (MAPPO)
   provides the coordination signal; the independent baseline (IPPO) removes it. This
   isolates the value of coordination.
@@ -163,7 +168,12 @@ PR-AUC, calibration (Brier score / reliability curve), with bootstrap confidence
 intervals. Hyperparameters and the small grid searched: Appendix A.
 
 ### 4.2 Environment and reward
-Reward terms and weights per ARCHITECTURE.md, fixed in `config/agents.yaml`.
+Reward terms and weights per ARCHITECTURE.md, fixed in `config/agents.yaml`. The
+credit-risk agent's reward was redesigned after an initial training failure
+(immediate expected-value shaping at decision time, a threshold concentration
+penalty, and a per-agent reward scale; full rationale in ARCHITECTURE.md section 4.2
+and the account in section 5.3). This changed only the credit agent's learning
+signal, not the combined objective J below, which is defined on firm-value outcomes.
 
 **Combined treasury objective (pre-registered).** All components are computed per
 episode and are dimensionless, so the weights are directly interpretable. Let `V_t` be
@@ -297,14 +307,17 @@ i.e., it is not idling excess cash relative to its own target, and the underlyin
 52-week task is clearly winnable by a sensible policy, not merely survivable.
 Single-agent PPO, trained for the same 1,000,000-timestep-per-seed budget as the
 multi-agent policies, matches this baseline closely (terminal firm value
-$373,061 +/- $3,187, section 5.3) -- it neither collapses to a degenerate policy
-nor discovers an advantage from observing the full state directly, which is itself
-informative: decomposition into four specialized agents (IPPO) does not help
-either at this training budget (terminal firm value $376,941 +/- $6,429, next to
-indistinguishable from the other two non-coordinated policies), consistent with
-the learning-curve figure below, where the rule-based reference line and the
-single-agent/IPPO training curves are visually overlapping for the entire training
-run.
+$377,682 +/- $5,688, section 5.3) -- it neither collapses to a degenerate policy nor
+discovers a large advantage from observing the full state directly. Decomposition
+into four specialized agents (IPPO) helps modestly (terminal firm value
+$392,151 +/- $4,464; combined objective 4.559 vs. the rule-based 4.307 and
+single-agent 4.347), largely because IPPO's now-working credit agent runs a
+more profitable book (section 5.3), but the effect is small on the firm-value axis
+because the credit exposures are deliberately small-scale (2% of loan size). On the
+learning-curve figure below, whose y-axis is terminal firm value, the rule-based
+reference line and the single-agent/IPPO training curves therefore remain visually
+close for the entire run -- the non-coordinated policies do not approach MAPPO's
+firm-value trajectory.
 
 ![Figure 3: representative 52-week cash trajectory](figures/cash_trajectory.png)
 
@@ -325,14 +338,19 @@ reached," not a decline from a peak.
 | Policy | Solvency-breach rate (B) | Max drawdown | Financing cost (diag.) | Default-loss rate | Return (r) | Risk-adj. return (RAR) | Combined objective (J) |
 |---|---|---|---|---|---|---|---|
 | Rule-based | 0.0 | $38,185 | $4,116 | 0.28% | 4.415 | 4.307 | 4.307 |
-| Single-agent PPO | 0.0 +/- 0.0 | $58,200 +/- $7,893 | $14,433 +/- $4,521 | n/a (0 resolutions) | 4.399 +/- 0.046 | 4.281 +/- 0.048 | 4.281 +/- 0.048 |
-| IPPO (independent) | 0.0 +/- 0.0 | $23,989 +/- $16,454 | $8,423 +/- $3,328 | n/a (0 resolutions) | 4.455 +/- 0.093 | 4.339 +/- 0.091 | 4.339 +/- 0.091 |
-| MAPPO (coordinated) | 0.0 +/- 0.0 | $51,314 +/- $26,918 | $98,735 +/- $5,369 | n/a (0.8 +/- 1.2 resolutions) | 13.886 +/- 0.934 | 13.789 +/- 0.917 | 13.789 +/- 0.917 |
+| Single-agent PPO | 0.0 +/- 0.0 | $58,700 +/- $15,121 | $11,364 +/- $7,226 | 0.87% | 4.466 +/- 0.082 | 4.347 +/- 0.081 | 4.347 +/- 0.081 |
+| IPPO (independent) | 0.0 +/- 0.0 | $14,342 +/- $5,649 | $7,391 +/- $1,902 | 0.31% | 4.675 +/- 0.065 | 4.559 +/- 0.063 | 4.559 +/- 0.063 |
+| MAPPO (coordinated) | 0.0 +/- 0.0 | $77,392 +/- $5,214 | $97,271 +/- $3,323 | 0.33% | 13.616 +/- 0.088 | 13.527 +/- 0.085 | 13.527 +/- 0.085 |
 
-"n/a (0 resolutions)" is itself a result, not missing data: it means that policy's
-credit-risk agent accepted so few exposures across all 100 episodes that none (or,
-for MAPPO, well under one per episode on average) reached their 12-week resolution
-before episode end -- see the narrative below and section 7.
+Credit-function metrics (pooled over the 100 held-out episodes; this is the component
+the reward redesign targeted -- see the narrative below and section 7):
+
+| Policy | Exposures resolved | Approval precision | Approval recall | Realized default rate | Portfolio yield (net of losses) |
+|---|---|---|---|---|---|
+| Rule-based | 3,322 | 0.977 | 0.927 | 2.3% | +0.022 |
+| Single-agent PPO | 3,033 | 0.970 | 0.837 | 3.1% | +0.045 |
+| IPPO (independent) | 3,180 | 0.978 | 0.893 | 2.2% | +0.051 |
+| MAPPO (coordinated) | 3,228 | 0.977 | 0.902 | 2.3% | +0.051 |
 
 Coordination lift (MAPPO vs each; paired Wilcoxon signed-rank across the 100
 shared evaluation episodes, each policy's per-episode value averaged over its 5
@@ -340,9 +358,9 @@ training seeds):
 
 | Comparison | Delta (combined objective) | Delta (solvency-breach rate) | Test statistic | p-value | Effect size (matched-pairs d) |
 |---|---|---|---|---|---|
-| MAPPO vs rule-based | +9.48 | 0.0 | 0.0 | 3.90e-18 | 24.45 |
-| MAPPO vs single-agent | +9.51 | 0.0 | 0.0 | 3.90e-18 | 39.65 |
-| MAPPO vs IPPO | +9.45 | 0.0 | 0.0 | 3.90e-18 | 40.77 |
+| MAPPO vs rule-based | +9.22 | 0.0 | 0.0 | 3.90e-18 | 30.0 |
+| MAPPO vs single-agent | +9.18 | 0.0 | 0.0 | 3.90e-18 | 29.9 |
+| MAPPO vs IPPO | +8.97 | 0.0 | 0.0 | 3.90e-18 | 50.5 |
 
 ![Figure 4a: learning curves](figures/learning_curves.png)
 
@@ -359,37 +377,52 @@ reward not comparable across policies; firm value is reward-scheme-independent.
 Figure 4b (`reports/figures/coordination_lift.png`): the same headline combined
 objective as a bar chart with seed error bars.
 
-Narrative: coordinated control (MAPPO) increased the combined objective by
-9.45-9.51 relative to every other policy (paired Wilcoxon p < 0.001 for all three
-comparisons, large effect sizes), and its terminal firm value ($1,028,609 +/-
-$64,543) is roughly 2.7-2.8x every other policy's. This is a real, statistically
-significant coordination lift, not a marginal or ambiguous one. But we traced its
-source before writing this narrative, because the size of the effect on its own
-warranted scrutiny (the same discipline applied to the section 5.1 credit-model
-result): we probed the trained credit-risk actor networks directly by feeding
-synthetic observations spanning the full predicted-default-probability range,
-0.0 to 1.0, and found that under all three learned policies (single-agent, IPPO,
-and MAPPO) the credit-risk agent outputs "deny" essentially regardless of input --
-confirmed by the resolution counts in the table above (0 to under 1 per 100
-episodes, against the rule-based baseline's 3,322). This is a genuine training
-result, not a bug: we verified the observation encoding, action space, and reward
-computation are all functioning as designed (the same code paths are exercised by
-`tests/test_env_api.py` and `tests/test_rewards.py`), and the collapse is a
-plausible consequence of a hard credit-assignment problem -- an accepted exposure
-resolves 12 weeks after the decision, and a default's loss (60% of notional) is
-far larger than a good loan's margin (2.5%, or 5.5% with the premium tier), so
-early exploration noise plausibly taught "deny everything" as a safe, near-zero
-local optimum before the agent could learn to use the risk score. The practical
-consequence is that **the measured MAPPO advantage is attributable to the
-liquidity, expenditure, and capital-allocation agents coordinating well under the
-shared reward, not to better credit decisions** -- the credit-risk agent performs
-about as poorly (by omission) under MAPPO as under IPPO and single-agent PPO. We
-report the lift as measured because it is real and reproducible under the stated
-protocol, and report this attribution alongside it rather than let the headline
-number imply a credit-specific improvement that the evidence does not support (see
-section 7 for the limitation stated in full, and section 5.4 for evidence that the
-qualitative lift is stable to calibration perturbations regardless of this
-credit-agent behavior).
+Narrative: coordinated control (MAPPO) increased the combined objective by 8.97-9.22
+relative to every other policy (paired Wilcoxon p < 0.001 for all three comparisons,
+matched-pairs effect sizes 30-50), and its terminal firm value ($1,009,982 +/-
+$6,114) is roughly 2.6-2.7x every other policy's. This is a real, statistically
+significant coordination lift, stable across every calibration perturbation tested
+(section 5.4).
+
+**A note on the credit-risk agent, and an honest account of an iteration this work
+went through.** In the first training run of this system the credit-risk agent
+collapsed to denying essentially every exposure under all three learned policies
+(0 to under 1 exposure resolved per 100 episodes, against the rule-based baseline's
+3,322). We diagnosed this rather than report it uncritically
+(`scripts/diagnose_credit_reward.py`): the dominant cause was a miscalibrated
+concentration penalty that taxed holding any exposure book at roughly 100x the
+margin it earned, compounded by a 12-week reward-resolution delay and a signal too
+small to learn against the shared reward. We redesigned the credit reward
+(docs/ARCHITECTURE.md section 4.2): a threshold concentration penalty that fires only
+on genuine over-concentration, an immediate expected-value signal at decision time
+using the model's predicted default probability, and a per-agent reward scale.
+Crucially this changes only *what the credit agent learns* -- the combined objective
+J is defined on firm value, volatility, and solvency, not on agent rewards, so the
+headline metric is unchanged and retraining under the redesign is a learning fix,
+not metric-gaming.
+
+After the redesign and a full retrain, the credit agent learns a sensible risk
+policy. Probing the trained actors across the full predicted-default range shows a
+clean threshold -- approve low-risk exposures, deny high-risk ones -- and the
+credit-function metrics above bear it out: all three learned policies now resolve
+~3,000-3,200 exposures (up from ~0) with approval precision ~0.97-0.98 (matching the
+rule-based heuristic) and a portfolio yield net of losses of +0.045 to +0.051,
+roughly double the rule-based baseline's +0.022, at a realized default rate
+(2.2-3.1%) well below the exposure pool's 9.7% base rate. The learned credit agents
+do not merely match the baseline; they run a more profitable book.
+
+This also sharpens what the coordination lift is and is not. With a working,
+profitable credit book now present in both IPPO and MAPPO, the ~9-point MAPPO
+advantage clearly does not come from credit decisions (both have good ones) -- it
+comes from the liquidity, expenditure, and capital-allocation agents coordinating
+over the shared cash pool under the centralized critic and shared reward. MAPPO's
+terminal firm value is ~2.6x the others' primarily through more aggressive,
+better-timed capital deployment, not through its small-scale (2%-of-loan) credit
+exposures. One caveat remains on the credit side: the learned agents prefer the
+approve-with-premium tier, because in the simulation the premium adds margin with no
+modeled downside (no customer price-sensitivity or attrition); in a real setting
+premium pricing would carry a demand cost. This is a simulation limitation
+(section 7), not a credit-skill artifact.
 
 ### 5.4 Sensitivity analysis
 Three consequential assumed constants were each varied one at a time (baseline in
@@ -402,11 +435,14 @@ policies'* qualitative ordering is robust to the environment's calibrated
 assumptions, not whether retraining under each assumption would change what is
 learned.
 
+Baseline (unperturbed, seed 0): rule-based 4.180, single-agent 4.196, IPPO 4.293,
+MAPPO 13.269.
+
 | Constant varied | Range tested | Effect on headline conclusion |
 |---|---|---|
-| Revenue volatility (`revenue.weekly_sigma_frac`, baseline 0.15) | 0.075, 0.30 | MAPPO still best at both values (combined objective 12.99 and 12.85 vs. baseline 12.95; all three other policies 4.06-4.25 across both values). Conclusion stable. |
-| Credit-exposure resolution horizon (`exposure_resolution_weeks`, baseline 12) | 6, 24 | Identical results to baseline for single-agent PPO, IPPO, and MAPPO (to the reported precision) -- a direct, independent corroboration of the section 5.3 finding that these three policies' credit-risk agents accept essentially nothing, so how long an accepted exposure takes to resolve cannot affect their outcomes. The rule-based policy, which does accept exposures, shifts slightly (4.194 and 4.152 vs. baseline 4.180) but MAPPO remains best in both cases. Conclusion stable. |
-| Cash buffer target (`buffer_days_target`, baseline 27 days) | 15, 40 | MAPPO still best at both values (12.96 and 12.93 vs. baseline 12.95; all three other policies 4.13-4.23 across both values). Conclusion stable. |
+| Revenue volatility (`revenue.weekly_sigma_frac`, baseline 0.15) | 0.075, 0.30 | MAPPO still best at both values (combined objective 13.31 and 13.19 vs. baseline 13.27; all three other policies 4.09-4.33 across both values). Conclusion stable. |
+| Credit-exposure resolution horizon (`exposure_resolution_weeks`, baseline 12) | 6, 24 | MAPPO still best at both values (13.33 and 13.24; other policies 4.15-4.33). A shorter resolution horizon (6 weeks) modestly raises every policy that lends -- now including the learned policies, whose credit agents accept exposures after the reward redesign (section 5.3) -- while a longer one (24 weeks) lowers them slightly; the ordering is unchanged. Conclusion stable. |
+| Cash buffer target (`buffer_days_target`, baseline 27 days) | 15, 40 | MAPPO still best at both values (13.30 and 13.23; other policies 4.13-4.29). Conclusion stable. |
 
 MAPPO remained the best policy on the combined objective in all 6 of 6
 perturbations tested, with its margin over the other three policies changing by
@@ -488,21 +524,24 @@ State plainly, in the body:
   future work.
 - Training budget is POC-scale (1,000,000 timesteps/seed, 5 seeds); results are not
   a production performance ceiling.
-- **The credit-risk agent did not learn to use the real default-probability signal
-  under any of the three learned policies** (section 5.3): it converged to denying
-  almost every exposure, confirmed by directly probing the trained networks across
-  the full predicted-probability range. The measured MAPPO coordination lift is
-  real and statistically significant, but is attributable to the other three
-  agents, not to improved credit decisions -- the credit function specifically is
-  not yet demonstrated to benefit from either learning or coordination in this POC.
-  Section 5.4's sensitivity analysis independently corroborates this: the
-  credit-exposure resolution horizon has literally zero effect on the three
-  learned policies' outcomes, because they accept almost nothing regardless of how
-  long an accepted exposure would take to resolve. Plausible next steps (not
-  attempted here, to avoid presenting an unverified fix as a result): a denser or
-  earlier reward signal for accepted exposures (e.g., partial credit at acceptance
-  time rather than only at 12-week resolution), reward normalization specific to
-  the credit-risk agent, or a longer, credit-agent-targeted training budget.
+- **Credit-agent learning (resolved after an initial failure; see section 5.3 for
+  the full account).** In this project's first training run the credit-risk agent
+  collapsed to denying almost every exposure under all three learned policies. We
+  diagnosed the cause (a concentration penalty that taxed any book at ~100x its
+  margin, plus a delayed, swamped signal; `scripts/diagnose_credit_reward.py`),
+  redesigned the credit reward (threshold concentration penalty, immediate
+  expected-value shaping at decision time, per-agent reward scale;
+  docs/ARCHITECTURE.md section 4.2), and retrained. After the fix the credit agent
+  learns a sensible risk threshold and the learned policies run credit books more
+  profitable than the rule-based baseline (section 5.3). Two residual caveats
+  remain: (i) the learned agents prefer the approve-with-premium tier because the
+  simulation gives the premium no downside (no modeled customer price-sensitivity
+  or attrition) -- in reality premium pricing would carry a demand cost; and
+  (ii) because the credit exposures are small-scale (2% of loan size) relative to
+  the firm's balance sheet, the MAPPO coordination lift is still driven mainly by
+  the liquidity/capital agents, not by credit -- the credit function is now a
+  working, profitable component in every learned policy, but it is not the source
+  of the headline coordination advantage.
 - The held-out credit-model ROC-AUC (0.939, section 5.1) reflects a structural
   property of the resolved-loan-only FOIA snapshot (loans still active as of the
   snapshot date are excluded) rather than a general forward-looking underwriting
@@ -555,20 +594,25 @@ cash-conservation invariant, and a four-way comparison of rule-based,
 single-agent, independent multi-agent (IPPO), and coordinated multi-agent (MAPPO)
 control on 100 shared held-out episodes. The central claim of the design --
 coordinated multi-agent control outperforms the alternatives -- is supported by
-this run: MAPPO increased the combined treasury objective by 9.45-9.51 over every
+this run: MAPPO increased the combined treasury objective by 8.97-9.22 over every
 other policy (paired p < 0.001, large effect sizes), and this held qualitatively
-across every calibration perturbation we tested (section 5.4). That result comes
-with a specific, material caveat we investigated and are reporting rather than
-smoothing over: the credit-risk agent did not learn to use the real risk signal
-under any learned policy, so the demonstrated coordination benefit is currently a
-liquidity/expenditure/capital-allocation result, not evidence that coordination
-also improves credit decisions specifically. Taken together, this establishes
-that the proposed architecture is implementable, that its central multi-agent
-coordination mechanism produces a measurable, statistically significant,
-robustness-checked effect on simulated firm outcomes, and that one of its four
-functions needs further training-design work before that same claim can be made
-about credit decisions -- a POC-appropriate, honestly scoped result, not a
-finished production system.
+across every calibration perturbation we tested (section 5.4). The report also
+documents an engineering iteration that we consider part of the contribution rather
+than something to smooth over: an initial run exposed a credit-risk agent that had
+collapsed to always-deny; we diagnosed the cause quantitatively, redesigned the
+credit reward, and retrained, after which the credit agent learns a sensible risk
+threshold and the learned policies run credit books more profitable than the
+rule-based baseline (sections 5.3, 7). One honest scoping point remains: because the
+modeled credit exposures are deliberately small relative to the balance sheet, the
+MAPPO coordination advantage is driven mainly by the liquidity and capital-allocation
+agents, not by credit -- credit is now a working, profitable component in every
+learned policy, but not the source of the headline lift. Taken together, this
+establishes that the proposed architecture is implementable, that its central
+multi-agent coordination mechanism produces a measurable, statistically significant,
+robustness-checked effect on simulated firm outcomes, and -- through the diagnosed
+and corrected credit-agent failure -- that the system is debuggable and improvable
+in the way real engineering artifacts are. This is a POC-appropriate, honestly
+scoped result, not a finished production system.
 
 ---
 

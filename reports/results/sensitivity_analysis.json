@@ -3,9 +3,9 @@
   "seed": 0,
   "baseline": {
     "rule_based": 4.180129848805092,
-    "single_agent_ppo": 4.14730205045005,
-    "ippo": 4.216990461766276,
-    "mappo": 12.948083448864907
+    "single_agent_ppo": 4.195926594717074,
+    "ippo": 4.292612246569599,
+    "mappo": 13.269478023637589
   },
   "perturbations": {
     "revenue.weekly_sigma_frac": [
@@ -13,9 +13,9 @@
         "value": 0.075,
         "metrics": {
           "rule_based": 4.220240572866952,
-          "single_agent_ppo": 4.1873766169596225,
-          "ippo": 4.254913077481357,
-          "mappo": 12.992421146059874
+          "single_agent_ppo": 4.234938814470803,
+          "ippo": 4.333392393978486,
+          "mappo": 13.30837388767926
         },
         "mappo_still_best": true
       },
@@ -23,9 +23,9 @@
         "value": 0.3,
         "metrics": {
           "rule_based": 4.087072515720662,
-          "single_agent_ppo": 4.056910995232535,
-          "ippo": 4.125161437161494,
-          "mappo": 12.847298085290348
+          "single_agent_ppo": 4.1012605886986515,
+          "ippo": 4.199451286119142,
+          "mappo": 13.191566732700737
         },
         "mappo_still_best": true
       }
@@ -35,9 +35,9 @@
         "value": 6,
         "metrics": {
           "rule_based": 4.1936169910608365,
-          "single_agent_ppo": 4.14730205045005,
-          "ippo": 4.216990461766276,
-          "mappo": 12.948083448864907
+          "single_agent_ppo": 4.222793160599089,
+          "ippo": 4.326397779397631,
+          "mappo": 13.32647167223582
         },
         "mappo_still_best": true
       },
@@ -45,9 +45,9 @@
         "value": 24,
         "metrics": {
           "rule_based": 4.1518165088681,
-          "single_agent_ppo": 4.14730205045005,
-          "ippo": 4.216990461766276,
-          "mappo": 12.948083448864907
+          "single_agent_ppo": 4.15157958429762,
+          "ippo": 4.231028686733409,
+          "mappo": 13.240487227510625
         },
         "mappo_still_best": true
       }
@@ -57,9 +57,9 @@
         "value": 15,
         "metrics": {
           "rule_based": 4.198945414861397,
-          "single_agent_ppo": 4.1778864064940695,
-          "ippo": 4.231218705126201,
-          "mappo": 12.960379147530416
+          "single_agent_ppo": 4.263188975681206,
+          "ippo": 4.294168481132216,
+          "mappo": 13.298435930499108
         },
         "mappo_still_best": true
       },
@@ -67,9 +67,9 @@
         "value": 40,
         "metrics": {
           "rule_based": 4.156519096357967,
-          "single_agent_ppo": 4.127475311745354,
-          "ippo": 4.14674830547537,
-          "mappo": 12.932670521228076
+          "single_agent_ppo": 4.1291575369434295,
+          "ippo": 4.228396338445481,
+          "mappo": 13.232445854269642
         },
         "mappo_still_best": true
       }
