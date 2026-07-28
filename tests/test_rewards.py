@@ -47,41 +47,47 @@ def test_liquidity_reward_penalizes_shortfall_more_than_a_healthy_week(
     assert r_distressed < r_healthy
 
 
-def test_credit_risk_reward_rewards_margin_and_penalizes_loss(
+def test_credit_risk_reward_rewards_positive_ev_and_penalizes_negative_ev(
     cfg: calibration.EnvConfig, agents_cfg: rewards.AgentsConfig
 ) -> None:
-    profit_actions = dynamics.WeekActions(
-        1.0, 0.0, 0.0, 0.0, 0.3, np.array([0.4, 0.3, 0.3]), credit_income=1000.0
-    )
-    _, profit_result = _step_once(cfg, profit_actions)
+    """R_cred now tracks the immediate expected value of the week's decisions:
+    positive EV (approving profitable exposures) is rewarded, negative EV penalized."""
     r_profit = rewards.credit_risk_reward(
-        profit_result, cfg, agents_cfg.credit_risk_rewards, outstanding_exposure_total=0.0
+        cfg,
+        agents_cfg.credit_risk_rewards,
+        credit_decision_ev=1000.0,
+        outstanding_exposure_total=0.0,
     )
-
-    loss_actions = dynamics.WeekActions(
-        1.0, 0.0, 0.0, 0.0, 0.3, np.array([0.4, 0.3, 0.3]), credit_default_loss=1000.0
-    )
-    _, loss_result = _step_once(cfg, loss_actions)
     r_loss = rewards.credit_risk_reward(
-        loss_result, cfg, agents_cfg.credit_risk_rewards, outstanding_exposure_total=0.0
+        cfg,
+        agents_cfg.credit_risk_rewards,
+        credit_decision_ev=-1000.0,
+        outstanding_exposure_total=0.0,
     )
-
     assert r_profit > 0.0
     assert r_loss < 0.0
+    # deny-everything (zero EV, no outstanding) is exactly neutral, not negative:
+    r_deny = rewards.credit_risk_reward(
+        cfg, agents_cfg.credit_risk_rewards, credit_decision_ev=0.0, outstanding_exposure_total=0.0
+    )
+    assert r_deny == pytest.approx(0.0)
 
 
-def test_credit_risk_reward_penalizes_concentration(
+def test_credit_risk_concentration_penalty_is_threshold_based(
     cfg: calibration.EnvConfig, agents_cfg: rewards.AgentsConfig
 ) -> None:
-    actions = dynamics.WeekActions(1.0, 0.0, 0.0, 0.0, 0.3, np.array([0.4, 0.3, 0.3]))
-    _, result = _step_once(cfg, actions)
-    r_low_concentration = rewards.credit_risk_reward(
-        result, cfg, agents_cfg.credit_risk_rewards, outstanding_exposure_total=0.0
-    )
-    r_high_concentration = rewards.credit_risk_reward(
-        result, cfg, agents_cfg.credit_risk_rewards, outstanding_exposure_total=50_000.0
-    )
-    assert r_high_concentration < r_low_concentration
+    """Prudent lending below the budget is free; only over-concentration is penalized."""
+    w = agents_cfg.credit_risk_rewards
+    budget = w.concentration_budget_frac * cfg.credit_line.limit
+
+    r_below = rewards.credit_risk_reward(cfg, w, 0.0, outstanding_exposure_total=budget * 0.5)
+    r_at = rewards.credit_risk_reward(cfg, w, 0.0, outstanding_exposure_total=budget)
+    r_above = rewards.credit_risk_reward(cfg, w, 0.0, outstanding_exposure_total=budget * 2.0)
+
+    assert r_below == pytest.approx(0.0)  # no penalty below the budget
+    assert r_at == pytest.approx(0.0)  # no penalty at the budget
+    assert r_above < 0.0  # penalized only above the budget
+    assert r_above < r_below
 
 
 def test_expenditure_reward_has_diminishing_returns(
@@ -128,10 +134,10 @@ def test_per_agent_rewards_includes_shared_scaled_by_weight(
     _, result = _step_once(cfg, actions)
 
     r_zero = rewards.per_agent_rewards(
-        result, old_state, cfg, agents_cfg, 0.0, shared_reward_weight=0.0
+        result, old_state, cfg, agents_cfg, 0.0, 0.0, shared_reward_weight=0.0
     )
     r_one = rewards.per_agent_rewards(
-        result, old_state, cfg, agents_cfg, 0.0, shared_reward_weight=1.0
+        result, old_state, cfg, agents_cfg, 0.0, 0.0, shared_reward_weight=1.0
     )
 
     for agent in ("liquidity", "credit_risk", "expenditure", "capital_allocation"):

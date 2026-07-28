@@ -39,6 +39,8 @@ class CreditRiskRewardWeights:
     margin_bps: float
     w_loss_given_default: float
     w_concentration: float
+    concentration_budget_frac: float
+    credit_reward_scale: float
 
 
 @dataclass(frozen=True)
@@ -99,17 +101,32 @@ def liquidity_reward(result: StepResult, cfg: EnvConfig, weights: LiquidityRewar
 
 
 def credit_risk_reward(
-    result: StepResult,
     cfg: EnvConfig,
     weights: CreditRiskRewardWeights,
+    credit_decision_ev: float,
     outstanding_exposure_total: float,
 ) -> float:
-    """R_cred = +margin_on_repaid - loss_given_default - concentration_penalty."""
+    """R_cred = credit_reward_scale * (expected value of this week's decisions) - concentration.
+
+    ``credit_decision_ev`` is the *immediate* expected value of this week's
+    approve/deny decisions, computed by the environment from the real model's
+    predicted default probability at decision time (see sme_treasury_env.py):
+    for each approved exposure, margin*(1-p) - w_lgd*LGD*p, in dollars; denials
+    contribute 0. This dense, immediate signal replaces the original reward, which
+    only resolved 12 weeks later and was too small to learn against R_shared
+    (docs/ARCHITECTURE.md section 4.2, reports/technical_report.md 5.3/7). Realized
+    cash flows still hit firm value via the environment dynamics, unchanged.
+
+    The concentration penalty is a threshold: it fires only on outstanding exposure
+    above ``concentration_budget_frac * credit_line.limit``, so ordinary prudent
+    lending is free and only genuine over-concentration is penalized.
+    """
     scale = cfg.revenue.weekly_mean
-    margin = result.flows["credit_income"] / scale
-    loss = weights.w_loss_given_default * (result.flows["credit_default_loss"] / scale)
-    concentration = weights.w_concentration * (outstanding_exposure_total / scale)
-    return margin - loss - concentration
+    margin_signal = weights.credit_reward_scale * (credit_decision_ev / scale)
+    budget = weights.concentration_budget_frac * cfg.credit_line.limit
+    over_budget = max(0.0, outstanding_exposure_total - budget)
+    concentration = weights.w_concentration * (over_budget / scale)
+    return margin_signal - concentration
 
 
 def expenditure_reward(
@@ -177,13 +194,14 @@ def per_agent_rewards(
     cfg: EnvConfig,
     agents_cfg: AgentsConfig,
     outstanding_exposure_total: float,
+    credit_decision_ev: float,
     shared_reward_weight: float,
 ) -> dict[str, float]:
     """R_i + shared_reward_weight * R_shared for each of the four agents, plus 'shared'."""
     r_shared = shared_reward(result, old_state, cfg, agents_cfg.shared)
     r_liq = liquidity_reward(result, cfg, agents_cfg.liquidity_rewards)
     r_cred = credit_risk_reward(
-        result, cfg, agents_cfg.credit_risk_rewards, outstanding_exposure_total
+        cfg, agents_cfg.credit_risk_rewards, credit_decision_ev, outstanding_exposure_total
     )
     r_exp = expenditure_reward(result, old_state, cfg, agents_cfg.expenditure_rewards)
     r_cap = capital_allocation_reward(result, cfg, agents_cfg.capital_allocation_rewards)

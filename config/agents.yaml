@@ -20,7 +20,22 @@ credit_risk:
   rewards:
     margin_bps: 250
     w_loss_given_default: 1.0
-    w_concentration: 0.2
+    # --- credit-agent reward redesign (see docs/ARCHITECTURE.md section 4.2) ---
+    # The initial POC's credit agent collapsed to "always deny" (technical_report.md
+    # 5.3/7). A quantitative diagnosis (scripts/diagnose_credit_reward.py) found two
+    # causes, both fixed here:
+    #  1. The concentration penalty taxed holding ANY exposure at ~100x the margin
+    #     it earned. It is now a THRESHOLD penalty: it fires only on outstanding
+    #     exposure ABOVE concentration_budget_frac x credit_line.limit, so prudent
+    #     lending is free and only genuine over-concentration is penalized.
+    #  2. The margin/loss signal only resolved 12 weeks after the decision and was
+    #     tiny relative to the shared reward. R_cred now uses an immediate
+    #     expected-value signal at decision time (using the model's predicted
+    #     default probability), scaled by credit_reward_scale so it is learnable
+    #     against R_shared. Realized cash flows still hit firm value unchanged.
+    w_concentration: 0.05             # was 0.2; now applies only above the budget
+    concentration_budget_frac: 1.0    # penalize outstanding above this x credit_line.limit; assumption
+    credit_reward_scale: 50.0         # lifts the (dense, immediate) EV signal to a learnable magnitude; assumption
 
 expenditure:
   actions:

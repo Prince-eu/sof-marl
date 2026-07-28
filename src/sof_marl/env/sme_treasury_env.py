@@ -112,7 +112,9 @@ class SMETreasuryEnv(ParallelEnv[str, NDArray[np.float32], NDArray[np.int64]]):
     ]:
         old_state = self.state
 
-        credit_decisions = self._process_credit_decisions(np.asarray(actions["credit_risk"]))
+        credit_decisions, credit_decision_ev = self._process_credit_decisions(
+            np.asarray(actions["credit_risk"])
+        )
         credit_income, credit_default_loss, credit_resolutions = self._resolve_due_exposures()
         outstanding_exposure_total = self._outstanding_exposure_total()
 
@@ -140,6 +142,7 @@ class SMETreasuryEnv(ParallelEnv[str, NDArray[np.float32], NDArray[np.int64]]):
             self.cfg,
             self.agents_cfg,
             outstanding_exposure_total,
+            credit_decision_ev,
             self.shared_reward_weight,
         )
         self._advance_credit_queue()
@@ -185,30 +188,47 @@ class SMETreasuryEnv(ParallelEnv[str, NDArray[np.float32], NDArray[np.int64]]):
         ):
             self._presented_this_week.append(self._pending_queue.popleft())
 
-    def _process_credit_decisions(self, credit_action: NDArray[np.int64]) -> list[dict[str, Any]]:
-        """Record each presented exposure's decision; return per-exposure records
-        for evaluation metrics (approval precision/recall against true labels)."""
+    def _process_credit_decisions(
+        self, credit_action: NDArray[np.int64]
+    ) -> tuple[list[dict[str, Any]], float]:
+        """Record each presented exposure's decision and accumulate this week's
+        decision-time expected value (the credit agent's reward-shaping signal).
+
+        Returns (per-exposure records for evaluation metrics, total decision EV in
+        dollars). The EV of an approved exposure uses the real model's predicted
+        default probability observed at decision time:
+        ``margin*(1-p) - w_lgd*LGD*p`` (with the premium margin when approved with
+        premium); a denial contributes 0. See agents/rewards.py::credit_risk_reward.
+        """
+        rw = self.agents_cfg.credit_risk_rewards
+        lgd = self.cfg.loss_given_default_frac
         decisions: list[dict[str, Any]] = []
+        decision_ev = 0.0
         for slot, row_id in enumerate(self._presented_this_week):
             decision = int(credit_action[slot])
             row = self._episode_exposures.loc[row_id]
+            predicted_prob = float(row["predicted_prob"])
+            amount = float(row["exposure_amount"])
             decisions.append(
                 {
-                    "predicted_prob": float(row["predicted_prob"]),
+                    "predicted_prob": predicted_prob,
                     "true_label": int(row["default"]),
-                    "amount": float(row["exposure_amount"]),
+                    "amount": amount,
                     "decision": decision,  # 0=deny, 1=approve, 2=approve_with_premium
                 }
             )
-            if decision == 0:  # deny
+            if decision == 0:  # deny -> no EV contribution
                 continue
+            bps = rw.margin_bps + (self.agents_cfg.credit_risk_premium_bps if decision == 2 else 0)
+            decision_ev += (bps / 10000.0) * (1.0 - predicted_prob) * amount
+            decision_ev -= rw.w_loss_given_default * lgd * predicted_prob * amount
             self._active_exposures[row_id] = _ActiveExposure(
-                amount=float(row["exposure_amount"]),
+                amount=amount,
                 true_label=int(row["default"]),
                 approved_with_premium=(decision == 2),
                 resolution_week=self.state.week + self.cfg.exposure_resolution_weeks,
             )
-        return decisions
+        return decisions, decision_ev
 
     def _resolve_due_exposures(self) -> tuple[float, float, list[dict[str, Any]]]:
         """Resolve exposures due this week; return (income, loss, per-exposure records)."""

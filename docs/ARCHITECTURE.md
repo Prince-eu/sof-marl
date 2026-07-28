@@ -180,8 +180,29 @@ prose:
 - **Idle-cash penalty** (liquidity, `R_liq`): `max(0, cash - 2 * buffer_target)`,
   i.e. only cash well beyond (2x) the agent's own chosen buffer target counts as
   idle, so this does not fight the capital-allocation agent's ordinary surplus use.
-- **Concentration penalty** (credit risk, `R_cred`): linear in total outstanding
-  (accepted, unresolved) exposure notional relative to weekly revenue.
+- **Credit-risk reward `R_cred` (redesigned after the Phase-E credit-agent finding;
+  see reports/technical_report.md 5.3/7).** The initial POC used the realized
+  margin/loss at the exposure's 12-week resolution, minus a per-week concentration
+  penalty linear in total outstanding notional. That collapsed the credit agent to
+  "always deny": a quantitative diagnosis (`scripts/diagnose_credit_reward.py`)
+  showed the concentration penalty taxed holding *any* book at ~100x the margin it
+  earned, and the realized signal was both delayed 12 weeks and too small to learn
+  against `R_shared`. `R_cred` is now
+  `credit_reward_scale * (decision_EV / weekly_revenue) - concentration`, where:
+  - **`decision_EV`** is the *immediate* expected value of this week's approve/deny
+    decisions, computed at decision time from the real model's predicted default
+    probability `p`: for each approved exposure,
+    `margin*(1-p) - w_lgd*LGD*p` (premium margin if approved with premium); a denial
+    contributes 0. Dense, immediate, and directly incentivizes approving positive-EV
+    exposures. Realized cash flows still resolve at 12 weeks and hit firm value
+    (hence `R_shared`) unchanged -- only the credit agent's *own* learning signal
+    moved to decision time.
+  - **`credit_reward_scale`** (`config/agents.yaml`) lifts this signal to a magnitude
+    learnable against `R_shared` (the agent-specific normalization).
+  - **concentration** is now a *threshold* penalty: `w_concentration * max(0,
+    outstanding - concentration_budget_frac * credit_line.limit) / weekly_revenue`,
+    so prudent lending below the budget is free and only genuine over-concentration
+    is penalized.
 - **Operational penalty for over-deferral** (expenditure, `R_exp`):
   `w_over_deferral * (1 - ops_health)`, directly using the latent `ops_health` term,
   which mean-reverts toward 1.0 when an *effective* spend rate is at or above

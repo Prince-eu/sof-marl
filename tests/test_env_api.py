@@ -62,3 +62,32 @@ def test_credit_risk_pending_requests_are_bounded_and_masked() -> None:
         assert valid_mask.sum() <= n_slots
         actions = {agent: env.action_space(agent).sample() for agent in env.agents}
         obs, _, _, _, _ = env.step(actions)
+
+
+def test_credit_reward_rewards_selective_approval_over_denial() -> None:
+    """Redesigned credit reward (EV shaping + threshold concentration): selectively
+    approving low-risk exposures is strictly better than denying everything -- the
+    original always-deny failure mode. Both runs see identical exposures (same seed);
+    shared_reward_weight=0 isolates the credit agent's own reward."""
+    env = SMETreasuryEnv(shared_reward_weight=0.0)
+
+    def episode_credit_reward(approve: bool) -> float:
+        env.reset(seed=0)
+        total = 0.0
+        while env.agents:
+            pending = env.pending_exposures()
+            cr = np.zeros(env.cfg.max_pending_credit_requests, dtype=np.int64)
+            if approve:
+                for i, exposure in enumerate(pending):
+                    cr[i] = 1 if exposure["predicted_prob"] < 0.04 else 0
+            actions = {
+                "liquidity": np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32),
+                "credit_risk": cr,
+                "expenditure": np.array([0.5, 0.5], dtype=np.float32),
+                "capital_allocation": np.array([0.4, 0.3, 0.3], dtype=np.float32),
+            }
+            _, rewards, _, _, _ = env.step(actions)
+            total += rewards["credit_risk"]
+        return total
+
+    assert episode_credit_reward(approve=True) > episode_credit_reward(approve=False)
