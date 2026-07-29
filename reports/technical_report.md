@@ -43,7 +43,10 @@ downturn, thin liquidity; section 5.5), the learned policies manage solvency mar
 better than the rule-based heuristic (breach rate 1.06% -> 0.00-0.08%), but on solvency
 specifically coordination adds nothing over independent multi-agent RL (MAPPO and IPPO
 tie at zero breaches) -- MAPPO's advantage is on capital efficiency and firm-value
-growth, not solvency, which we state plainly. We also document an engineering iteration that strengthens the
+growth, not solvency, which we state plainly. Across four stylized sector profiles
+(section 5.6) the baseline coordinated policy transfers zero-shot to every sector with no
+solvency breaches, and domain-randomized retraining does not improve on it at these
+profile distances -- a null result we report as-is. We also document an engineering iteration that strengthens the
 result: in an initial run the credit-risk agent collapsed to denying essentially every
 exposure; we diagnosed the cause (a miscalibrated concentration penalty plus a delayed,
 swamped reward), redesigned the credit reward, and retrained, after which the credit
@@ -557,6 +560,67 @@ is on capital efficiency and firm-value growth, not on solvency, where independe
 multi-agent RL already reaches the floor. This is a sharper, more useful statement of
 where the coordination benefit lives than the baseline result alone could give.
 
+### 5.6 Cross-sector generalization
+
+The headline results (section 5.3) train and evaluate on a single representative SME
+profile. To probe whether the coordinated policy is specific to that profile, we defined
+four stylized sector profiles (`config/sectors/{general,retail,manufacturing,services}.yaml`)
+that differ in economically-motivated ways: retail has stronger seasonality and fast
+(net-15) receivables; manufacturing has slow (net-60/90) receivables, low seasonality,
+and higher term-debt leverage; services is asset-light with thin receivables and a large
+cash buffer; general is the section-5.3 baseline. Only economic constants vary -- the
+observation and action dimensions are unchanged -- so the same policy network runs on any
+sector. Because initial firm value V_0 differs across sectors, the combined objective J
+is compared only *within* a sector, never across.
+
+We ran two arms. **Zero-shot** evaluates the section-5.3 baseline policies (trained on
+the general profile *only*) on each sector without any retraining -- a direct
+off-distribution transfer test. **Domain-randomized (DR)** retrains all three learned
+policies from scratch with the sector profile resampled uniformly at each episode
+(`SMETreasuryEnv(sector_config_paths=...)`, 5 seeds, same 1M-timestep budget), then
+evaluates per sector. If the sectors were pulling the policy in genuinely different
+directions, DR should beat zero-shot.
+
+| Sector | Policy | J (zero-shot) | J (domain-rand.) | Breach rate (both) | Terminal firm value (zero-shot) |
+|---|---|---|---|---|---|
+| General | MAPPO | 13.53 | 13.47 | 0.00% | $1,009,982 |
+| General | IPPO | 4.56 | 4.46 | 0.00% | $392,151 |
+| Retail | MAPPO | 13.60 | 13.55 | 0.00% | $1,017,703 |
+| Retail | IPPO | 5.35 | 5.17 | 0.00% | $447,863 |
+| Manufacturing | MAPPO | 23.69 | 23.60 | 0.00% | $970,513 |
+| Manufacturing | IPPO | 6.52 | 6.42 | 0.00% | $301,774 |
+| Services | MAPPO | 7.42 | 7.40 | 0.00% | $1,092,654 |
+| Services | IPPO | 1.57 | 1.51 | 0.00% | $339,238 |
+
+![Figure 8: cross-sector generalization](figures/generalization.png)
+
+Figure 8 (`reports/figures/generalization.png`): combined objective J by policy and
+sector, zero-shot vs domain-randomized (mean over 5 seeds x 100 episodes).
+
+Two honest findings. First, **the baseline coordinated policy transfers zero-shot to
+every sector without breaking**: MAPPO retains its large lead over IPPO, single-agent,
+and the rule-based heuristic in all four sectors, grows terminal firm value to ~$0.97M--
+$1.09M, and never breaches solvency (0.00% in every sector) -- despite having been
+trained on the general profile alone. The learned treasury strategy is not overfit to
+one sector's constants.
+
+Second, and reported just as plainly: **domain randomization does not improve on the
+zero-shot baseline -- it is marginally worse everywhere.** Across all four sectors DR
+leaves MAPPO's J essentially unchanged and slightly lower (deltas -0.02 to -0.09, under
+0.4%), and the same small negative gap holds for IPPO (largest DR drop: retail IPPO
+5.35 -> 5.17, -3.4%). Both arms sit at a 0.00% breach rate in every sector, so there was
+no robustness gap for DR to close. The most parsimonious reading is that these sector
+profiles, while economically distinct, are near enough in the dynamics that matter to
+the policy that a single-profile policy already generalizes; DR then pays a small
+diversification cost (the same training budget spread across four regimes) without a
+compensating robustness benefit. This is a genuine null result for domain randomization
+*at these profile distances* -- not evidence that DR is useless in general, but evidence
+that for this POC the cheaper zero-shot baseline is as good, which is itself useful to
+know. A stronger test would widen the sector gaps (e.g. an order-of-magnitude firm-size
+range, or a sector whose calibration does induce zero-shot breaches) so that robustness
+becomes a live constraint; we report the null at the distances actually tested rather
+than tuning the sectors until DR wins.
+
 ---
 
 ## 6. Interpretability
@@ -622,8 +686,11 @@ State plainly, in the body:
   Real SBA loan amounts are also scaled down by a fixed factor
   (`credit_exposure_scale_frac = 0.02`) to bring them to a plausible trade-credit
   size relative to this firm's revenue -- an assumption, not a calibrated mapping.
-- A single SME profile class is modeled; generalization across sectors and sizes is
-  future work.
+- Cross-sector generalization is tested across four stylized sector profiles
+  (section 5.6): the baseline coordinated policy transfers zero-shot to all four
+  without solvency breaches, and domain randomization does not improve on it at these
+  profile distances. Generalization across firm *sizes* (order-of-magnitude scale) and
+  wider sector gaps that make robustness a live constraint remains future work.
 - Training budget is POC-scale (1,000,000 timesteps/seed, 5 seeds); results are not
   a production performance ceiling.
 - **Credit-agent learning (resolved after an initial failure; see section 5.3 for

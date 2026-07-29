@@ -1,0 +1,214 @@
+{
+  "zero_shot": {
+    "general": {
+      "rule_based": {
+        "combined_objective": 4.307079306568086,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 374185.2949044697,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 4.346953574492631,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 377682.28778030374,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 4.55881522483815,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 392150.7190243036,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 13.526817278147895,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 1009982.2125049868,
+        "n_episodes": 500
+      }
+    },
+    "retail": {
+      "rule_based": {
+        "combined_objective": 4.976509596554222,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 421468.421793204,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 5.240368657573785,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 440300.0147095873,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 5.350092994136208,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 447862.9550564196,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 13.601782325849623,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 1017702.8506195334,
+        "n_episodes": 500
+      }
+    },
+    "manufacturing": {
+      "rule_based": {
+        "combined_objective": 6.188818795824221,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 288398.0721069353,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 6.180393741802317,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 288887.82955875184,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 6.517563284317797,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 301773.9940924478,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 23.68547838147389,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 970513.2748083638,
+        "n_episodes": 500
+      }
+    },
+    "services": {
+      "rule_based": {
+        "combined_objective": 1.4324793312958588,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 321219.44734726363,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 1.4479448068026457,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 323681.8247779697,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 1.5687242816227593,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 339238.1744468096,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 7.418259522133113,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 1092654.0913277825,
+        "n_episodes": 500
+      }
+    }
+  },
+  "domain_randomized": {
+    "general": {
+      "rule_based": {
+        "combined_objective": 4.307079306568086,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 374185.2949044697,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 4.357763552868225,
+        "solvency_breach_rate": 3.846153846153846e-05,
+        "terminal_firm_value": 377673.9130258677,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 4.457249519197676,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 384949.72422456334,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 13.471552434504932,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 1006355.5680127104,
+        "n_episodes": 500
+      }
+    },
+    "retail": {
+      "rule_based": {
+        "combined_objective": 4.976509596554222,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 421468.421793204,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 5.167040016549649,
+        "solvency_breach_rate": 7.692307692307693e-05,
+        "terminal_firm_value": 434725.7448557778,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 5.172057391252701,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 435332.74844591186,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 13.551827151422042,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 1014406.3110180226,
+        "n_episodes": 500
+      }
+    },
+    "manufacturing": {
+      "rule_based": {
+        "combined_objective": 6.188818795824221,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 288398.0721069353,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 6.199801940734997,
+        "solvency_breach_rate": 3.846153846153846e-05,
+        "terminal_firm_value": 288764.99127792893,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 6.421031074999298,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 297837.37030197296,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 23.596538388782637,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 967365.7759439253,
+        "n_episodes": 500
+      }
+    },
+    "services": {
+      "rule_based": {
+        "combined_objective": 1.4324793312958588,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 321219.44734726363,
+        "n_episodes": 100
+      },
+      "single_agent_ppo": {
+        "combined_objective": 1.469955553065254,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 326261.9000952092,
+        "n_episodes": 500
+      },
+      "ippo": {
+        "combined_objective": 1.514401081572163,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 332077.6659492497,
+        "n_episodes": 500
+      },
+      "mappo": {
+        "combined_objective": 7.399963451299195,
+        "solvency_breach_rate": 0.0,
+        "terminal_firm_value": 1090501.395209004,
+        "n_episodes": 500
+      }
+    }
+  }
+}
