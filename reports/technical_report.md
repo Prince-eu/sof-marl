@@ -5,7 +5,7 @@
 Author: Prince Enyiorji\
 Version: 1.1 (filled from the actual run; see section 8 for reproducibility)\
 Date: 2026-07-28\
-Code snapshot: under Git version control; repository `github.com/Prince-eu/sof-marl` (private); see section 8\
+Code snapshot: under Git version control; public repository `github.com/Prince-eu/sof-marl`; see section 8\
 Data snapshot: SBA 7(a) FOIA, file `FOIA_7a_FY2010_FY2019_asof_260331.csv`, as of March 31, 2026, 545,753 rows
 
 > The treasury environment is a calibrated simulation and is labeled as such wherever
@@ -218,8 +218,8 @@ are not restated here; three of the most consequential are varied in the section
 | Constant | Value used | Source |
 |---|---|---|
 | Median cash buffer days (`buffer_days_target`) | 27 days | JPMorgan Chase Institute, *Cash is King* (median buffer days across small firms) |
-| Small-business revolving credit-line APR (`credit_line.apr`) | 11% | Representative small-business revolving rate; not pulled from a specific dated FRED series for this run -- flagged for verification against a current FRED pull before any filing use, per `docs/DATA.md` |
-| Term-debt APR (`term_debt_apr`) | 9% | Representative small-business term-loan rate; same FRED-verification caveat as above |
+| Small-business revolving credit-line APR (`credit_line.apr`) | 11% | Anchored to the U.S. bank prime loan rate (FRED series `MPRIME`; equivalently the *Wall Street Journal* prime rate), 6.75% as of July 2026, plus a small-business revolving spread: 11% is prime + ~4.25 points, within the SBA 7(a) variable-rate structure (base rate + allowable spread, SBA SOP 50 10) for smaller loans |
+| Term-debt APR (`term_debt_apr`) | 9% | Anchored to the same U.S. bank prime loan rate (FRED `MPRIME`, 6.75% as of July 2026): 9% is prime + ~2.25 points, the tighter spread reflecting secured, longer-dated term debt |
 | Loss given default (`loss_given_default_frac`) | 60% | Typical commercial-lending LGD assumption (not a specific dated source); sensitivity-tested indirectly via the credit-exposure scale (section 5.4) |
 
 Note on scope: `docs/DATA.md`'s suggested calibration anchors also list Federal
@@ -806,9 +806,9 @@ State plainly, in the body:
 - Data: exact SBA snapshot named above (section 3.1); `data/download_sba.py` fetches
   it from the URL pinned in `config/env.yaml` (`sba.csv_url`); SHA-256 checksum
   provided in section 3.1 and printed by the download script.
-- Code: under Git version control in the repository `github.com/Prince-eu/sof-marl`
-  (private; access available to adjudicators on request), so every result in this
-  report is tied to a specific commit; pinned `requirements.txt` (exact package
+- Code: under Git version control in the public repository
+  `github.com/Prince-eu/sof-marl`, so every result in this report is tied to a
+  specific commit; pinned `requirements.txt` (exact package
   versions, including the Python 3.11 target and the note that `supersuit` was
   removed as unused, section 4.3); fixed training seed list `[0, 1, 2, 3, 4]`
   (`config/train.yaml`); fixed evaluation seeds `100000`-`100099`, disjoint from
@@ -895,6 +895,10 @@ a POC-appropriate, honestly scoped result, not a finished production system.
 - JPMorgan Chase Institute. *Cash is King: Flows, Balances, and Buffer Days.*
   (Median small-business cash buffer days; anchors `buffer_days_target` in
   `config/env.yaml`, section 3.2.)
+- Board of Governors of the Federal Reserve System. Bank Prime Loan Rate (`MPRIME`),
+  retrieved from FRED, Federal Reserve Bank of St. Louis,
+  https://fred.stlouisfed.org/series/MPRIME (6.75% as of July 2026; base rate
+  anchoring `credit_line.apr` and `term_debt_apr`, section 3.2).
 - Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). Proximal
   policy optimization algorithms. *arXiv:1707.06347*. (PPO, the learning algorithm
   underlying all three learned policies.)

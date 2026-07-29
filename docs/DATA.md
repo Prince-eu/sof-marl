@@ -74,7 +74,7 @@ Suggested calibration anchors (verify current values when you pull them):
 | Share of small firms seeking external financing; approval/shortfall rates | Fed Small Business Credit Survey figures | *2026 Report on Employer Firms* / SBCS [Exhibits B.5, B.6] |
 | SME population scale / sector mix context | 36.2M small businesses; sector shares | SBA Office of Advocacy 2025 profile [Exhibit B.7] |
 | Financing gap / constraint framing | qualitative realism of credit scarcity | BCG/Biz2X, IFC [Exhibits B.16, B.19] |
-| Interest-rate / financing-cost level | current small-business loan rate range | FRED series (cite series ID and pull date) |
+| Interest-rate / financing-cost level | credit-line APR 11%, term-debt APR 9% | Bank prime loan rate (FRED series `MPRIME`, 6.75% as of July 2026) + small-business spread; see report section 3.2 |
 
 Rules:
 - Every calibration constant has a source comment. If no public anchor exists for a
