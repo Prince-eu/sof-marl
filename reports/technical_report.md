@@ -38,8 +38,12 @@ the pre-registered combined treasury objective by 8.97-9.22 relative to every ot
 policy (mean over 5 training seeds, 100 shared evaluation episodes, paired Wilcoxon
 signed-rank p < 0.001 for all three comparisons), and the qualitative result was
 unchanged across six perturbations of three consequential calibration constants
-(section 5.4). No policy, including the rule-based baseline, breached solvency in any
-evaluation episode. We also document an engineering iteration that strengthens the
+(section 5.4). Under a separate, pre-registered adverse stress scenario (sharp
+downturn, thin liquidity; section 5.5), the learned policies manage solvency markedly
+better than the rule-based heuristic (breach rate 1.06% -> 0.00-0.08%), but on solvency
+specifically coordination adds nothing over independent multi-agent RL (MAPPO and IPPO
+tie at zero breaches) -- MAPPO's advantage is on capital efficiency and firm-value
+growth, not solvency, which we state plainly. We also document an engineering iteration that strengthens the
 result: in an initial run the credit-risk agent collapsed to denying essentially every
 exposure; we diagnosed the cause (a miscalibrated concentration penalty plus a delayed,
 swamped reward), redesigned the credit reward, and retrained, after which the credit
@@ -498,6 +502,61 @@ perturbation was not attempted and would be needed to claim robustness of the
 *training outcome* itself, as distinct from the *trained policies' evaluated
 behavior*.
 
+### 5.5 Stress test: solvency under a pre-registered adverse scenario
+Under the baseline calibration no policy ever breached solvency (section 5.3), which
+makes the solvency-management claim untestable there. We therefore defined a
+pre-registered adverse scenario and *retrained* all policies under it, to ask
+directly: under adversity, does coordinated control manage solvency better?
+
+**Pre-registration (`config/env_stress.yaml`, Scenario E).** A sharp-downturn regime:
+revenue -30% (`annual_mean` $1.2M -> $840k), elevated cash-flow volatility
+(`weekly_sigma_frac` 0.15 -> 0.50), higher operating leverage (`fixed_weekly_frac`
+0.55 -> 0.72), a thin starting buffer (`initial.cash` $80k -> $20k), and tightened
+bank credit (`credit_line.limit` $100k -> $15k). The harshness was calibrated *blind
+to the learned-policy ranking* -- set using only the fixed rule-based heuristic as a
+reference, to the regime where solvency becomes a live constraint (rule-based breaches
+~1% of weeks) while the firm remains survivable. All three learned policies were
+retrained for 5 seeds each under this scenario and evaluated on 100 held-out stress
+episodes (`--env-config config/env_stress.yaml --tag stress`).
+
+| Policy | Solvency-breach rate (B) | Terminal firm value | Financing cost | Buffer days (p10) | Combined objective (J) |
+|---|---|---|---|---|---|
+| Rule-based | 1.06% | $66,857 | $10,464 | 12.6 | 5.181 |
+| Single-agent PPO | 0.08% +/- 0.08% | $71,691 +/- $2,047 | $11,494 | 18.6 | 5.700 +/- 0.216 |
+| IPPO (independent) | 0.00% +/- 0.00% | $75,364 +/- $2,658 | $10,779 | 17.2 | 6.126 +/- 0.291 |
+| MAPPO (coordinated) | 0.00% +/- 0.00% | $577,855 +/- $145,729 | $81,394 | 37.2 | 61.414 +/- 16.252 |
+
+![Figure 7: stress-test summary](figures/stress_solvency.png)
+
+Figure 7 (`reports/figures/stress_solvency.png`): solvency-breach rate and combined
+objective by policy under Scenario E, mean +/- seed std.
+
+Narrative, with two honest findings that point in different directions. First, the
+stress test does what it was designed to: solvency became binding (the rule-based
+heuristic breaches 1.06% of weeks, vs. 0% at baseline), and **the learned policies
+manage it markedly better** -- single-agent PPO cuts breaches to 0.08% and both
+multi-agent policies eliminate them entirely (0.00%), while also holding a higher 10th-
+percentile buffer (17-37 days vs. the rule-based 12.6). So reinforcement learning,
+using the liquidity levers the rule-based policy leaves unused (deferring payables,
+accelerating receivables, cutting discretionary spend in a crunch), demonstrably
+improves solvency management under adversity.
+
+Second, and reported just as plainly: **on solvency specifically, coordination adds
+nothing over independent multi-agent RL.** MAPPO and IPPO are tied at a 0.00% breach
+rate (the paired MAPPO-vs-IPPO solvency-breach delta is exactly 0). The solvency
+benefit comes from learning and the multi-agent liquidity levers, not from the shared
+critic or shared reward. MAPPO's combined-objective dominance under stress (J 61.4 vs.
+5-6; terminal firm value ~8x the others') is real and significant (paired Wilcoxon
+p < 0.001) but is a *capital-efficiency / firm-value-growth* phenomenon, not a solvency
+one -- and its large magnitude is partly amplified by the scenario's thin initial
+equity: with `initial.cash` cut to $20k, initial firm value V_0 is only ~$9k, so the
+return term r = (V_52 - V_0)/V_0 is inflated by the small denominator (MAPPO grows the
+thin equity ~63x). The cleaner cross-policy comparison under stress is the terminal
+firm-value column (~8x), not J. Net: coordination's demonstrated advantage in this POC
+is on capital efficiency and firm-value growth, not on solvency, where independent
+multi-agent RL already reaches the floor. This is a sharper, more useful statement of
+where the coordination benefit lives than the baseline result alone could give.
+
 ---
 
 ## 6. Interpretability
@@ -645,17 +704,22 @@ than something to smooth over: an initial run exposed a credit-risk agent that h
 collapsed to always-deny; we diagnosed the cause quantitatively, redesigned the
 credit reward, and retrained, after which the credit agent learns a sensible risk
 threshold and the learned policies run credit books more profitable than the
-rule-based baseline (sections 5.3, 7). One honest scoping point remains: because the
+rule-based baseline (sections 5.3, 7). Two honest scoping points remain. Because the
 modeled credit exposures are deliberately small relative to the balance sheet, the
 MAPPO coordination advantage is driven mainly by the liquidity and capital-allocation
 agents, not by credit -- credit is now a working, profitable component in every
-learned policy, but not the source of the headline lift. Taken together, this
-establishes that the proposed architecture is implementable, that its central
-multi-agent coordination mechanism produces a measurable, statistically significant,
-robustness-checked effect on simulated firm outcomes, and -- through the diagnosed
-and corrected credit-agent failure -- that the system is debuggable and improvable
-in the way real engineering artifacts are. This is a POC-appropriate, honestly
-scoped result, not a finished production system.
+learned policy, but not the source of the headline lift. And a pre-registered adverse
+stress test (section 5.5) further localizes the coordination benefit: under a sharp
+downturn with thin liquidity, all learned policies manage solvency far better than the
+rule-based heuristic, but coordinated control (MAPPO) and independent multi-agent RL
+(IPPO) tie at zero breaches -- so coordination's demonstrated advantage in this POC is
+on capital efficiency and firm-value growth, not on solvency, where independent agents
+already suffice. Taken together, this establishes that the proposed architecture is
+implementable, that its central multi-agent coordination mechanism produces a
+measurable, statistically significant, robustness-checked effect on simulated firm
+outcomes, and -- through the diagnosed and corrected credit-agent failure -- that the
+system is debuggable and improvable in the way real engineering artifacts are. This is
+a POC-appropriate, honestly scoped result, not a finished production system.
 
 ---
 

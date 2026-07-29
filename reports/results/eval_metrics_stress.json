@@ -1,0 +1,687 @@
+{
+  "objective_weights": {
+    "kappa_volatility": 1.0,
+    "lambda_solvency": 3.0
+  },
+  "n_episodes": 100,
+  "policies": {
+    "rule_based": {
+      "per_seed": [
+        {
+          "seed": 0,
+          "return_r": 6.346955059247091,
+          "volatility_s": 1.1337890633458614,
+          "solvency_breach_rate": 0.010576923076923078,
+          "max_drawdown": 9972.755921802878,
+          "financing_cost": 10463.955990480075,
+          "terminal_firm_value": 66857.29103914853,
+          "risk_adjusted_return": 5.21316599590123,
+          "combined_objective": 5.1814352266704615,
+          "buffer_days_mean": 23.090643815989754,
+          "buffer_days_p10": 12.560121445651706,
+          "invested_capital_growth_norm": 0.9513828661615135,
+          "approval_precision": 0.9770491803278688,
+          "approval_recall": 0.9271111111111111,
+          "realized_default_rate": 0.022877784467188442,
+          "realized_loss_rate_dollar": 0.002808098154174844,
+          "portfolio_yield_net": 0.02207489775606789,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3322.0
+        }
+      ],
+      "aggregated": {
+        "return_r": {
+          "mean": 6.346955059247091,
+          "std": 0.0
+        },
+        "volatility_s": {
+          "mean": 1.1337890633458614,
+          "std": 0.0
+        },
+        "solvency_breach_rate": {
+          "mean": 0.010576923076923078,
+          "std": 0.0
+        },
+        "max_drawdown": {
+          "mean": 9972.755921802878,
+          "std": 0.0
+        },
+        "financing_cost": {
+          "mean": 10463.955990480075,
+          "std": 0.0
+        },
+        "terminal_firm_value": {
+          "mean": 66857.29103914853,
+          "std": 0.0
+        },
+        "risk_adjusted_return": {
+          "mean": 5.21316599590123,
+          "std": 0.0
+        },
+        "combined_objective": {
+          "mean": 5.1814352266704615,
+          "std": 0.0
+        },
+        "buffer_days_mean": {
+          "mean": 23.090643815989754,
+          "std": 0.0
+        },
+        "buffer_days_p10": {
+          "mean": 12.560121445651706,
+          "std": 0.0
+        },
+        "invested_capital_growth_norm": {
+          "mean": 0.9513828661615135,
+          "std": 0.0
+        },
+        "approval_precision": {
+          "mean": 0.9770491803278688,
+          "std": 0.0
+        },
+        "approval_recall": {
+          "mean": 0.9271111111111111,
+          "std": 0.0
+        },
+        "realized_default_rate": {
+          "mean": 0.022877784467188442,
+          "std": 0.0
+        },
+        "realized_loss_rate_dollar": {
+          "mean": 0.002808098154174844,
+          "std": 0.0
+        },
+        "portfolio_yield_net": {
+          "mean": 0.02207489775606789,
+          "std": 0.0
+        },
+        "n_decisions": {
+          "mean": 5000.0,
+          "std": 0.0
+        },
+        "n_resolutions": {
+          "mean": 3322.0,
+          "std": 0.0
+        }
+      },
+      "n_seeds": 1
+    },
+    "single_agent_ppo": {
+      "per_seed": [
+        {
+          "seed": 0,
+          "return_r": 6.639086596402958,
+          "volatility_s": 1.1616132603399558,
+          "solvency_breach_rate": 0.0013461538461538463,
+          "max_drawdown": 16843.847478604945,
+          "financing_cost": 12124.002864707178,
+          "terminal_firm_value": 69515.68802726692,
+          "risk_adjusted_return": 5.477473336063002,
+          "combined_objective": 5.473434874524542,
+          "buffer_days_mean": 36.30174470223146,
+          "buffer_days_p10": 16.350925858972385,
+          "invested_capital_growth_norm": 1.6354179503150112,
+          "approval_precision": 0.9647018505825908,
+          "approval_recall": 0.6255555555555555,
+          "realized_default_rate": 0.03484912877178071,
+          "realized_loss_rate_dollar": 0.010635396742325366,
+          "portfolio_yield_net": 0.04217394703229149,
+          "n_decisions": 5000.0,
+          "n_resolutions": 2353.0
+        },
+        {
+          "seed": 1,
+          "return_r": 6.716608989096482,
+          "volatility_s": 1.1593338396392066,
+          "solvency_breach_rate": 0.0009615384615384616,
+          "max_drawdown": 18462.884851388277,
+          "financing_cost": 11359.059869961255,
+          "terminal_firm_value": 70221.14180077799,
+          "risk_adjusted_return": 5.557275149457276,
+          "combined_objective": 5.55439053407266,
+          "buffer_days_mean": 33.51524489841998,
+          "buffer_days_p10": 16.153831829635195,
+          "invested_capital_growth_norm": 1.3932693577837745,
+          "approval_precision": 0.9753394292047659,
+          "approval_recall": 0.7822222222222223,
+          "realized_default_rate": 0.022996766079770033,
+          "realized_loss_rate_dollar": 0.010522403918167705,
+          "portfolio_yield_net": 0.04257956781302937,
+          "n_decisions": 5000.0,
+          "n_resolutions": 2783.0
+        },
+        {
+          "seed": 2,
+          "return_r": 7.005632137312302,
+          "volatility_s": 1.2388090760438635,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 19309.53671995471,
+          "financing_cost": 11456.861546396136,
+          "terminal_firm_value": 72851.25244954195,
+          "risk_adjusted_return": 5.766823061268437,
+          "combined_objective": 5.766823061268437,
+          "buffer_days_mean": 38.47140674682955,
+          "buffer_days_p10": 21.04068450606615,
+          "invested_capital_growth_norm": 0.2823471031349035,
+          "approval_precision": 0.979294254884806,
+          "approval_recall": 0.7462222222222222,
+          "realized_default_rate": 0.020224719101123594,
+          "realized_loss_rate_dollar": 0.007224462753314474,
+          "portfolio_yield_net": 0.045491389068939146,
+          "n_decisions": 5000.0,
+          "n_resolutions": 2670.0
+        },
+        {
+          "seed": 3,
+          "return_r": 6.773723795200891,
+          "volatility_s": 1.152086106346291,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 19591.388430465307,
+          "financing_cost": 11435.764350290645,
+          "terminal_firm_value": 70740.88653632811,
+          "risk_adjusted_return": 5.621637688854601,
+          "combined_objective": 5.621637688854601,
+          "buffer_days_mean": 35.55675724672298,
+          "buffer_days_p10": 19.9227699301608,
+          "invested_capital_growth_norm": 0.0,
+          "approval_precision": 0.9720564297341291,
+          "approval_recall": 0.7962222222222223,
+          "realized_default_rate": 0.02743580724586704,
+          "realized_loss_rate_dollar": 0.0077578279948959245,
+          "portfolio_yield_net": 0.0455663584132849,
+          "n_decisions": 5000.0,
+          "n_resolutions": 2843.0
+        },
+        {
+          "seed": 4,
+          "return_r": 7.255783229591958,
+          "volatility_s": 1.1638952494183883,
+          "solvency_breach_rate": 0.0019230769230769232,
+          "max_drawdown": 18296.955790833224,
+          "financing_cost": 11095.537853634101,
+          "terminal_firm_value": 75127.62738928683,
+          "risk_adjusted_return": 6.09188798017357,
+          "combined_objective": 6.0861187494043385,
+          "buffer_days_mean": 34.679595213434254,
+          "buffer_days_p10": 19.28525640617462,
+          "invested_capital_growth_norm": 2.470958375633569,
+          "approval_precision": 0.9791666666666666,
+          "approval_recall": 0.7102222222222222,
+          "realized_default_rate": 0.018979833926453145,
+          "realized_loss_rate_dollar": 0.0064721677073391265,
+          "portfolio_yield_net": 0.046536849889280064,
+          "n_decisions": 5000.0,
+          "n_resolutions": 2529.0
+        }
+      ],
+      "aggregated": {
+        "return_r": {
+          "mean": 6.878166949520919,
+          "std": 0.224948968159986
+        },
+        "volatility_s": {
+          "mean": 1.175147506357541,
+          "std": 0.032076423684610354
+        },
+        "solvency_breach_rate": {
+          "mean": 0.0008461538461538461,
+          "std": 0.0007556493347841732
+        },
+        "max_drawdown": {
+          "mean": 18500.92265424929,
+          "std": 962.4884217391991
+        },
+        "financing_cost": {
+          "mean": 11494.245296997862,
+          "std": 340.1925587371699
+        },
+        "terminal_firm_value": {
+          "mean": 71691.31924064035,
+          "std": 2047.0356102558771
+        },
+        "risk_adjusted_return": {
+          "mean": 5.703019443163377,
+          "std": 0.21634466772728286
+        },
+        "combined_objective": {
+          "mean": 5.700480981624915,
+          "std": 0.21551165996281588
+        },
+        "buffer_days_mean": {
+          "mean": 35.704949761527644,
+          "std": 1.66598732354317
+        },
+        "buffer_days_p10": {
+          "mean": 18.550693706201834,
+          "std": 1.9599058724845322
+        },
+        "invested_capital_growth_norm": {
+          "mean": 1.1563985573734517,
+          "std": 0.9071778699722697
+        },
+        "approval_precision": {
+          "mean": 0.9741117262145916,
+          "std": 0.005416424725887463
+        },
+        "approval_recall": {
+          "mean": 0.7320888888888889,
+          "std": 0.061079765698451895
+        },
+        "realized_default_rate": {
+          "mean": 0.024897251024998908,
+          "std": 0.00576097840819138
+        },
+        "realized_loss_rate_dollar": {
+          "mean": 0.008522451823208519,
+          "std": 0.0017284348291750826
+        },
+        "portfolio_yield_net": {
+          "mean": 0.044469622443365,
+          "std": 0.0017528661236191718
+        },
+        "n_decisions": {
+          "mean": 5000.0,
+          "std": 0.0
+        },
+        "n_resolutions": {
+          "mean": 2635.6,
+          "std": 177.28575802923368
+        }
+      },
+      "n_seeds": 5
+    },
+    "ippo": {
+      "per_seed": [
+        {
+          "seed": 0,
+          "return_r": 7.101582551706553,
+          "volatility_s": 1.1567662685925564,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 18334.34514384057,
+          "financing_cost": 10807.65537088202,
+          "terminal_firm_value": 73724.40122052962,
+          "risk_adjusted_return": 5.944816283113995,
+          "combined_objective": 5.944816283113995,
+          "buffer_days_mean": 34.012876624591826,
+          "buffer_days_p10": 13.8785326192621,
+          "invested_capital_growth_norm": 2.1741745999768294,
+          "approval_precision": 0.9770475960376903,
+          "approval_recall": 0.8986666666666666,
+          "realized_default_rate": 0.023052959501557634,
+          "realized_loss_rate_dollar": 0.0030111917237694323,
+          "portfolio_yield_net": 0.05160836773582691,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3210.0
+        },
+        {
+          "seed": 1,
+          "return_r": 7.480870553117314,
+          "volatility_s": 1.1562896039964723,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 19550.121301193976,
+          "financing_cost": 10735.744641673793,
+          "terminal_firm_value": 77175.92203336756,
+          "risk_adjusted_return": 6.324580949120841,
+          "combined_objective": 6.324580949120841,
+          "buffer_days_mean": 40.7826034477974,
+          "buffer_days_p10": 23.89602626595864,
+          "invested_capital_growth_norm": 4.721117732924675,
+          "approval_precision": 0.9786614936954413,
+          "approval_recall": 0.8968888888888888,
+          "realized_default_rate": 0.021793275217932753,
+          "realized_loss_rate_dollar": 0.0027086597876595786,
+          "portfolio_yield_net": 0.05199944238251123,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3212.0
+        },
+        {
+          "seed": 2,
+          "return_r": 7.761497059828349,
+          "volatility_s": 1.1586353138587504,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 19470.556584292935,
+          "financing_cost": 10751.398839947778,
+          "terminal_firm_value": 79729.62324443797,
+          "risk_adjusted_return": 6.602861745969599,
+          "combined_objective": 6.602861745969599,
+          "buffer_days_mean": 40.02731844320508,
+          "buffer_days_p10": 20.942674979743042,
+          "invested_capital_growth_norm": 3.682033310249443,
+          "approval_precision": 0.9787131107885825,
+          "approval_recall": 0.8991111111111111,
+          "realized_default_rate": 0.022022332506203474,
+          "realized_loss_rate_dollar": 0.0027910601729327863,
+          "portfolio_yield_net": 0.05183677874174222,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3224.0
+        },
+        {
+          "seed": 3,
+          "return_r": 7.0323552272325545,
+          "volatility_s": 1.1550639857473897,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 18324.303342097897,
+          "financing_cost": 10797.721108983238,
+          "terminal_firm_value": 73094.43256781626,
+          "risk_adjusted_return": 5.877291241485165,
+          "combined_objective": 5.877291241485165,
+          "buffer_days_mean": 34.538268083251495,
+          "buffer_days_p10": 16.197714282096495,
+          "invested_capital_growth_norm": 2.1609417714515042,
+          "approval_precision": 0.9793307086614174,
+          "approval_recall": 0.8844444444444445,
+          "realized_default_rate": 0.020311012377023166,
+          "realized_loss_rate_dollar": 0.002744637639437822,
+          "portfolio_yield_net": 0.05190528452766436,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3151.0
+        },
+        {
+          "seed": 4,
+          "return_r": 7.032604812887971,
+          "volatility_s": 1.1534611967106916,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 16895.261792608075,
+          "financing_cost": 10802.296269090455,
+          "terminal_firm_value": 73096.70379728056,
+          "risk_adjusted_return": 5.879143616177281,
+          "combined_objective": 5.879143616177281,
+          "buffer_days_mean": 28.038907701265607,
+          "buffer_days_p10": 11.056960835383043,
+          "invested_capital_growth_norm": 3.420258789522022,
+          "approval_precision": 0.9761208576998051,
+          "approval_recall": 0.8902222222222222,
+          "realized_default_rate": 0.023861852433281004,
+          "realized_loss_rate_dollar": 0.003318150070878206,
+          "portfolio_yield_net": 0.05126702548592535,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3185.0
+        }
+      ],
+      "aggregated": {
+        "return_r": {
+          "mean": 7.281782040954548,
+          "std": 0.2920745169726253
+        },
+        "volatility_s": {
+          "mean": 1.156043273781172,
+          "std": 0.0017279003956849645
+        },
+        "solvency_breach_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "max_drawdown": {
+          "mean": 18514.91763280669,
+          "std": 967.1729641510399
+        },
+        "financing_cost": {
+          "mean": 10778.963246115458,
+          "std": 29.486165099585325
+        },
+        "terminal_firm_value": {
+          "mean": 75364.2165726864,
+          "std": 2657.8781044508873
+        },
+        "risk_adjusted_return": {
+          "mean": 6.125738767173376,
+          "std": 0.2906726120468208
+        },
+        "combined_objective": {
+          "mean": 6.125738767173376,
+          "std": 0.2906726120468208
+        },
+        "buffer_days_mean": {
+          "mean": 35.47999486002228,
+          "std": 4.630439999575636
+        },
+        "buffer_days_p10": {
+          "mean": 17.194381796488663,
+          "std": 4.660855679743499
+        },
+        "invested_capital_growth_norm": {
+          "mean": 3.231705240824895,
+          "std": 0.9717615804442835
+        },
+        "approval_precision": {
+          "mean": 0.9779747533765875,
+          "std": 0.0011959890115974246
+        },
+        "approval_recall": {
+          "mean": 0.8938666666666666,
+          "std": 0.0056874998304164625
+        },
+        "realized_default_rate": {
+          "mean": 0.022208286407199608,
+          "std": 0.0012045094540963396
+        },
+        "realized_loss_rate_dollar": {
+          "mean": 0.002914739878935565,
+          "std": 0.00022748326835811682
+        },
+        "portfolio_yield_net": {
+          "mean": 0.05172337977473401,
+          "std": 0.00026216263436179007
+        },
+        "n_decisions": {
+          "mean": 5000.0,
+          "std": 0.0
+        },
+        "n_resolutions": {
+          "mean": 3196.4,
+          "std": 26.004614975038564
+        }
+      },
+      "n_seeds": 5
+    },
+    "mappo": {
+      "per_seed": [
+        {
+          "seed": 0,
+          "return_r": 70.48944702530878,
+          "volatility_s": 0.9436032790394758,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 20000.0,
+          "financing_cost": 91557.62751995919,
+          "terminal_firm_value": 650553.9679303099,
+          "risk_adjusted_return": 69.5458437462693,
+          "combined_objective": 69.5458437462693,
+          "buffer_days_mean": 91.20682035680952,
+          "buffer_days_p10": 56.9403810848884,
+          "invested_capital_growth_norm": 22.75823814685265,
+          "approval_precision": 0.9788819875776398,
+          "approval_recall": 0.8755555555555555,
+          "realized_default_rate": 0.020466901183242726,
+          "realized_loss_rate_dollar": 0.0024363982578893264,
+          "portfolio_yield_net": 0.052288111762442864,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3127.0
+        },
+        {
+          "seed": 1,
+          "return_r": 30.48723929779517,
+          "volatility_s": 1.5635195467979157,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 18967.780240071796,
+          "financing_cost": 27508.689812910114,
+          "terminal_firm_value": 286533.8776099362,
+          "risk_adjusted_return": 28.923719750997265,
+          "combined_objective": 28.923719750997265,
+          "buffer_days_mean": 43.97471620170996,
+          "buffer_days_p10": 19.966664806533856,
+          "invested_capital_growth_norm": 0.5502865183005873,
+          "approval_precision": 0.976063829787234,
+          "approval_recall": 0.8971111111111111,
+          "realized_default_rate": 0.023255813953488372,
+          "realized_loss_rate_dollar": 0.003181311556476665,
+          "portfolio_yield_net": 0.051458673688791104,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3225.0
+        },
+        {
+          "seed": 2,
+          "return_r": 70.60631929409168,
+          "volatility_s": 0.9522651695306708,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 20000.0,
+          "financing_cost": 89810.30493653832,
+          "terminal_firm_value": 651617.5055762342,
+          "risk_adjusted_return": 69.65405412456099,
+          "combined_objective": 69.65405412456099,
+          "buffer_days_mean": 84.02029700550857,
+          "buffer_days_p10": 57.87834900981981,
+          "invested_capital_growth_norm": 26.289907271870096,
+          "approval_precision": 0.9748743718592965,
+          "approval_recall": 0.9053333333333333,
+          "realized_default_rate": 0.026396562308164517,
+          "realized_loss_rate_dollar": 0.0037027375442637168,
+          "portfolio_yield_net": 0.050852605579180754,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3258.0
+        },
+        {
+          "seed": 3,
+          "return_r": 69.69016906011008,
+          "volatility_s": 0.9450265400816875,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 20000.0,
+          "financing_cost": 98256.0183426418,
+          "terminal_firm_value": 643280.5384470018,
+          "risk_adjusted_return": 68.7451425200284,
+          "combined_objective": 68.7451425200284,
+          "buffer_days_mean": 45.486126028644854,
+          "buffer_days_p10": 27.739871679054282,
+          "invested_capital_growth_norm": 21.41013314225862,
+          "approval_precision": 0.9752591894439209,
+          "approval_recall": 0.9197777777777778,
+          "realized_default_rate": 0.0257419745608722,
+          "realized_loss_rate_dollar": 0.004126105602371488,
+          "portfolio_yield_net": 0.05038580783122912,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3302.0
+        },
+        {
+          "seed": 4,
+          "return_r": 71.22959475242098,
+          "volatility_s": 1.0297918129483805,
+          "solvency_breach_rate": 0.0,
+          "max_drawdown": 20000.0,
+          "financing_cost": 99835.76686361305,
+          "terminal_firm_value": 657289.312247031,
+          "risk_adjusted_return": 70.1998029394726,
+          "combined_objective": 70.1998029394726,
+          "buffer_days_mean": 42.11957236040728,
+          "buffer_days_p10": 23.508371330699866,
+          "invested_capital_growth_norm": 43.51510897377125,
+          "approval_precision": 0.9765453212802345,
+          "approval_recall": 0.8882222222222222,
+          "realized_default_rate": 0.023802067021609773,
+          "realized_loss_rate_dollar": 0.0033995097168153395,
+          "portfolio_yield_net": 0.05128510697940748,
+          "n_decisions": 5000.0,
+          "n_resolutions": 3193.0
+        }
+      ],
+      "aggregated": {
+        "return_r": {
+          "mean": 62.50055388594533,
+          "std": 16.01414923225783
+        },
+        "volatility_s": {
+          "mean": 1.086841269679626,
+          "std": 0.24050616899142402
+        },
+        "solvency_breach_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "max_drawdown": {
+          "mean": 19793.556048014358,
+          "std": 412.8879039712818
+        },
+        "financing_cost": {
+          "mean": 81393.68149513248,
+          "std": 27210.97791054332
+        },
+        "terminal_firm_value": {
+          "mean": 577855.0403621027,
+          "std": 145728.75801354623
+        },
+        "risk_adjusted_return": {
+          "mean": 61.413712616265705,
+          "std": 16.251644032992093
+        },
+        "combined_objective": {
+          "mean": 61.413712616265705,
+          "std": 16.251644032992093
+        },
+        "buffer_days_mean": {
+          "mean": 61.361506390616036,
+          "std": 21.581212930710876
+        },
+        "buffer_days_p10": {
+          "mean": 37.20672758219924,
+          "std": 16.680642087185035
+        },
+        "invested_capital_growth_norm": {
+          "mean": 22.90473481061064,
+          "std": 13.698347123730253
+        },
+        "approval_precision": {
+          "mean": 0.9763249399896651,
+          "std": 0.001406784343444934
+        },
+        "approval_recall": {
+          "mean": 0.8972000000000001,
+          "std": 0.01499998353908563
+        },
+        "realized_default_rate": {
+          "mean": 0.02393266380547552,
+          "std": 0.0020895498575963303
+        },
+        "realized_loss_rate_dollar": {
+          "mean": 0.0033692125355633067,
+          "std": 0.0005640023439271985
+        },
+        "portfolio_yield_net": {
+          "mean": 0.05125406116821026,
+          "std": 0.0006367293309634884
+        },
+        "n_decisions": {
+          "mean": 5000.0,
+          "std": 0.0
+        },
+        "n_resolutions": {
+          "mean": 3221.0,
+          "std": 59.272253205019965
+        }
+      },
+      "n_seeds": 5
+    }
+  },
+  "coordination_lift": {
+    "mappo_vs_rule_based": {
+      "delta_combined_objective_mean": 56.23227738959525,
+      "delta_solvency_breach_rate_mean": -0.010576923076923078,
+      "wilcoxon_statistic": 0.0,
+      "p_value": 3.89655984509591e-18,
+      "effect_size_matched_pairs_d": 28.638347256637775,
+      "significant_at_alpha": true
+    },
+    "mappo_vs_single_agent": {
+      "delta_combined_objective_mean": 55.713231634640806,
+      "delta_solvency_breach_rate_mean": -0.0008461538461538462,
+      "wilcoxon_statistic": 0.0,
+      "p_value": 3.89655984509591e-18,
+      "effect_size_matched_pairs_d": 24.67365586345983,
+      "significant_at_alpha": true
+    },
+    "mappo_vs_ippo": {
+      "delta_combined_objective_mean": 55.28797384909233,
+      "delta_solvency_breach_rate_mean": 0.0,
+      "wilcoxon_statistic": 0.0,
+      "p_value": 3.89655984509591e-18,
+      "effect_size_matched_pairs_d": 27.977665179238176,
+      "significant_at_alpha": true
+    }
+  }
+}

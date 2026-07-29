@@ -206,6 +206,48 @@ def plot_representative_cash_trajectory(results_dir: Path, out_path: Path) -> No
     plt.close(fig)
 
 
+def plot_stress_summary(results_dir: Path, out_path: Path) -> None:
+    """Two-panel stress-scenario summary: solvency-breach rate (the stress-test
+    headline) and combined objective J, by policy, under the pre-registered adverse
+    Scenario E. Reads reports/results/eval_metrics_stress.json."""
+    metrics = json.loads((results_dir / "eval_metrics_stress.json").read_text())
+    policies = ["rule_based", "single_agent_ppo", "ippo", "mappo"]
+    colors = ["gray", *[LEARNED_POLICY_COLORS[p] for p in policies[1:]]]
+    labels = [POLICY_LABELS[p] for p in policies]
+
+    def col(metric: str) -> tuple[list[float], list[float]]:
+        means = [metrics["policies"][p]["aggregated"][metric]["mean"] for p in policies]
+        stds = [metrics["policies"][p]["aggregated"][metric]["std"] for p in policies]
+        return means, stds
+
+    fig, (ax_b, ax_j) = plt.subplots(1, 2, figsize=(12, 5))
+
+    breach_means, breach_stds = col("solvency_breach_rate")
+    ax_b.bar(
+        labels,
+        [b * 100 for b in breach_means],
+        yerr=[s * 100 for s in breach_stds],
+        color=colors,
+        capsize=5,
+    )
+    ax_b.set_ylabel("Solvency-breach rate (% of weeks, simulated)")
+    ax_b.set_title("Solvency under adverse Scenario E")
+    ax_b.tick_params(axis="x", labelrotation=20)
+
+    j_means, j_stds = col("combined_objective")
+    ax_j.bar(labels, j_means, yerr=j_stds, color=colors, capsize=5)
+    ax_j.set_ylabel("Combined objective J (held-out stress episodes, simulated)")
+    ax_j.set_title("Combined objective under adverse Scenario E")
+    ax_j.tick_params(axis="x", labelrotation=20)
+    ax_j.axhline(0, color="black", linewidth=0.8)
+
+    fig.suptitle("Pre-registered stress test (Scenario E): sharp downturn, thin liquidity")
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/train.yaml")
@@ -219,6 +261,8 @@ def main() -> int:
     plot_learning_curves(results_dir, ppo_total_timesteps, figures_dir / "learning_curves.png")
     plot_coordination_lift_bar_chart(results_dir, figures_dir / "coordination_lift.png")
     plot_representative_cash_trajectory(results_dir, figures_dir / "cash_trajectory.png")
+    if (results_dir / "eval_metrics_stress.json").exists():
+        plot_stress_summary(results_dir, figures_dir / "stress_solvency.png")
     print(f"Wrote figures to {figures_dir}")
     return 0
 
