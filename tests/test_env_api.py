@@ -91,3 +91,28 @@ def test_credit_reward_rewards_selective_approval_over_denial() -> None:
         return total
 
     assert episode_credit_reward(approve=True) > episode_credit_reward(approve=False)
+
+
+def test_sector_domain_randomization_samples_multiple_sectors_with_stable_spaces() -> None:
+    """A domain-randomized env samples different sector profiles across resets, but
+    observation/action spaces stay identical (only economic constants vary)."""
+    sectors = [
+        f"config/sectors/{s}.yaml" for s in ("general", "retail", "manufacturing", "services")
+    ]
+    env = SMETreasuryEnv(sector_config_paths=sectors)
+    base_obs_shapes = {a: env.observation_space(a).shape for a in env.possible_agents}
+    seen = set()
+    for seed in range(16):
+        env.reset(seed=seed)
+        seen.add(env.current_sector)
+        for a in env.possible_agents:
+            assert env.observation_space(a).shape == base_obs_shapes[a]
+    assert len(seen) >= 2  # randomization actually varies the sector
+
+
+def test_fixed_sector_env_uses_that_sectors_calibration() -> None:
+    retail = SMETreasuryEnv(config_path="config/sectors/retail.yaml")
+    manufacturing = SMETreasuryEnv(config_path="config/sectors/manufacturing.yaml")
+    # retail has stronger seasonality; manufacturing carries more term debt
+    assert retail.cfg.revenue.seasonal_amplitude > manufacturing.cfg.revenue.seasonal_amplitude
+    assert manufacturing.cfg.initial.term_debt > retail.cfg.initial.term_debt

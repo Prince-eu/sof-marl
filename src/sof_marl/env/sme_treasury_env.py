@@ -53,9 +53,26 @@ class SMETreasuryEnv(ParallelEnv[str, NDArray[np.float32], NDArray[np.int64]]):
         config_path: str | Path = "config/env.yaml",
         agents_config_path: str | Path = "config/agents.yaml",
         shared_reward_weight: float = 0.0,
+        sector_config_paths: list[str] | None = None,
     ) -> None:
         super().__init__()
-        self.cfg = calibration.load_env_config(config_path)
+        # Domain randomization over sector profiles: if sector_config_paths is given,
+        # a profile is sampled uniformly at each reset (config/sectors/*.yaml). Only
+        # economic constants vary across sectors, so observation/action spaces are
+        # identical -- the spaces below are built once and stay valid. When it is None
+        # the env uses the single config_path (baseline behavior, unchanged).
+        self._sector_cfgs: list[calibration.EnvConfig] = (
+            [calibration.load_env_config(p) for p in sector_config_paths]
+            if sector_config_paths
+            else []
+        )
+        self._sector_names: list[str] = (
+            [Path(p).stem for p in sector_config_paths] if sector_config_paths else []
+        )
+        self.cfg = (
+            self._sector_cfgs[0] if self._sector_cfgs else calibration.load_env_config(config_path)
+        )
+        self.current_sector: str = self._sector_names[0] if self._sector_names else "general"
         self.agents_cfg = rewards_module.load_agents_config(agents_config_path)
         self.shared_reward_weight = shared_reward_weight
 
@@ -86,6 +103,11 @@ class SMETreasuryEnv(ParallelEnv[str, NDArray[np.float32], NDArray[np.int64]]):
     ) -> tuple[dict[str, NDArray[np.float32]], dict[str, dict[str, Any]]]:
         self.rng = np.random.default_rng(seed)
         self.agents = list(self.possible_agents)
+        # Domain randomization: sample this episode's sector profile (if configured).
+        if self._sector_cfgs:
+            i = int(self.rng.integers(0, len(self._sector_cfgs)))
+            self.cfg = self._sector_cfgs[i]
+            self.current_sector = self._sector_names[i]
         self.state = dynamics.initial_state(self.cfg)
 
         self._episode_exposures = calibration.sample_episode_exposures(

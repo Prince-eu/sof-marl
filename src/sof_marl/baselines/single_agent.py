@@ -47,9 +47,15 @@ class SingleAgentTreasuryEnv(Env[NDArray[np.float32], NDArray[np.float32]]):
         self,
         config_path: str | Path = "config/env.yaml",
         agents_config_path: str | Path = "config/agents.yaml",
+        sector_config_paths: list[str] | None = None,
     ) -> None:
         super().__init__()
-        self._env = SMETreasuryEnv(config_path, agents_config_path, shared_reward_weight=0.0)
+        self._env = SMETreasuryEnv(
+            config_path,
+            agents_config_path,
+            shared_reward_weight=0.0,
+            sector_config_paths=sector_config_paths,
+        )
         n_slots = self._env.cfg.max_pending_credit_requests
         if n_slots != CREDIT_RISK_SLOTS_ASSUMED:
             raise ValueError(
