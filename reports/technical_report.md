@@ -13,7 +13,7 @@ Data snapshot: SBA 7(a) FOIA, file `FOIA_7a_FY2010_FY2019_asof_260331.csv`, as o
 
 ---
 
-## Executive summary (plain language)
+## Executive summary
 
 *This is a proof of concept, not a finished or deployed product. This page is written
 to be read first, in plain language, by a non-specialist; every statement here is
