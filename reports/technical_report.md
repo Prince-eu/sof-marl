@@ -21,7 +21,7 @@ supported by the technical sections that follow, and nothing here is stronger th
 those sections show.*
 
 **What was built.** A working software prototype of the four-agent autonomous-finance
-system I designed and published in Enyiorji (2025) (Exhibit C.2). Four specialized
+system I designed and published in Enyiorji (2025). Four specialized
 software agents -- one each for liquidity (cash), credit risk, expenditure (spending),
 and capital allocation (investment) -- jointly manage a small business's weekly money
 decisions across a one-year horizon, learning to coordinate rather than act in
@@ -793,7 +793,7 @@ State plainly, in the body:
   future iteration could calibrate a tighter buffer or higher-volatility scenario
   specifically to test solvency management under stress.
 - This report and the underlying code were produced with AI coding assistance
-  (Claude Code) under the author's direction; the architecture (Exhibit C.2), all
+  (Claude Code) under the author's direction; the architecture (Enyiorji 2025), all
   design decisions, and the decision to report every result -- including the
   credit-agent finding above -- as measured are the author's.
 
@@ -827,7 +827,7 @@ State plainly, in the body:
 
 The underlying endeavor is the author's own. The four-agent autonomous-finance
 architecture demonstrated here originates in the author's peer-reviewed paper, Enyiorji
-(2025) (Exhibit C.2); the design of this prototype -- the choice of agents, the treasury
+(2025); the design of this prototype -- the choice of agents, the treasury
 state and dynamics, the reward and coordination structure, the credit-model formulation,
 the evaluation protocol, the pre-registered stress and sensitivity tests, and the
 cross-sector generalization study -- reflects the author's decisions and direction. The
