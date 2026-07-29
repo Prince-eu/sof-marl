@@ -35,6 +35,7 @@ loan's actual outcome -- fully repaid or charged off. Because these are real out
 the model's accuracy is genuinely measurable rather than asserted.
 
 **What was measured, and the honest result.**
+
 - *Credit model (real data).* The model separates repaid from charged-off loans well
   (ROC-AUC 0.94). I did not stop at the flattering headline: most of that power comes
   from loan-term structure, and a more conservative reading that removes that feature
@@ -71,7 +72,7 @@ the credit labels are a proxy (SBA loan defaults standing in for trade-credit ri
 and this is proof-of-concept scale, not a production system. These are detailed in
 section 7.
 
----
+<div class="pagebreak"></div>
 
 ## Abstract
 
@@ -749,6 +750,7 @@ contradicting it.
 ## 7. Limitations
 
 State plainly, in the body:
+
 - The treasury environment is a calibrated simulation, not observed firm data.
 - The credit model uses SBA 7(a) loan outcomes as a proxy for SME default risk; it is
   real but not identical to the trade-credit exposures modeled in the environment.

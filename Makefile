@@ -28,8 +28,9 @@ eval:
 	python -m sof_marl.evaluation.figures
 
 report:
-	@echo "reports/technical_report.md is filled with real results. Convert to PDF"
-	@echo "(e.g. pandoc reports/technical_report.md -o reports/technical_report.pdf)."
+	cd reports && pandoc technical_report.md -o technical_report.pdf \
+		--pdf-engine=weasyprint --css report.css \
+		--metadata pagetitle="SOF-MARL Technical Report" --metadata lang=en-US
 
 check:
 	ruff check src tests
