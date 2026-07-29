@@ -3,13 +3,73 @@
 **Technical Report**
 
 Author: Prince Enyiorji\
-Version: 1.0 (filled from the actual run; see section 8 for reproducibility)\
-Date: 2026-07-21\
-Code snapshot: not under version control at time of writing (local working directory); see section 8\
+Version: 1.1 (filled from the actual run; see section 8 for reproducibility)\
+Date: 2026-07-28\
+Code snapshot: under Git version control; repository `github.com/Prince-eu/sof-marl` (private); see section 8\
 Data snapshot: SBA 7(a) FOIA, file `FOIA_7a_FY2010_FY2019_asof_260331.csv`, as of March 31, 2026, 545,753 rows
 
 > The treasury environment is a calibrated simulation and is labeled as such wherever
 > it appears; the credit-risk model is trained on real public data.
+
+---
+
+## Executive summary (plain language)
+
+*This is a proof of concept, not a finished or deployed product. This page is written
+to be read first, in plain language, by a non-specialist; every statement here is
+supported by the technical sections that follow, and nothing here is stronger than what
+those sections show.*
+
+**What was built.** A working software prototype of the four-agent autonomous-finance
+system I designed and published in Enyiorji (2025) (Exhibit C.2). Four specialized
+software agents -- one each for liquidity (cash), credit risk, expenditure (spending),
+and capital allocation (investment) -- jointly manage a small business's weekly money
+decisions across a one-year horizon, learning to coordinate rather than act in
+isolation. This prototype implements the architecture from my paper directly; it is the
+system I published, not a generic demonstration.
+
+**What real data was used.** The credit-risk agent is trained on real, public U.S.
+government data: the Small Business Administration's 7(a) loan records (FOIA release,
+545,753 loans, https://data.sba.gov/en/dataset/7-a-504-foia). Each record contains the
+loan's actual outcome -- fully repaid or charged off. Because these are real outcomes,
+the model's accuracy is genuinely measurable rather than asserted.
+
+**What was measured, and the honest result.**
+- *Credit model (real data).* The model separates repaid from charged-off loans well
+  (ROC-AUC 0.94). I did not stop at the flattering headline: most of that power comes
+  from loan-term structure, and a more conservative reading that removes that feature
+  drops accuracy to 0.62 -- a normal, honest number on this kind of data. A separate
+  survival-analysis cross-check (concordance 0.93) confirms the strong result is not
+  merely an artifact of which loans the snapshot includes. I report all three figures,
+  not just the highest.
+- *The multi-agent result (simulation).* On identical held-out test years, the
+  coordinated four-agent system outperformed a rule-based heuristic, a single
+  controller, and non-coordinated agents on a pre-registered treasury objective, by a
+  margin that is statistically significant and stable across five independent training
+  runs and across perturbations of the key assumptions. This supports the central claim
+  of my paper: coordination among the agents measurably helps.
+- *Where the benefit does and does not lie (honest scoping).* Under a deliberately harsh
+  downturn scenario, the learning-based policies protect the business from running out
+  of cash far better than the rule-based heuristic -- but on that specific survival
+  measure, coordinated and non-coordinated agents tie; coordination's measured edge is
+  on growing firm value, not on avoiding insolvency. And across four different business
+  types, the coordinated policy already transfers well without special retraining. I
+  state these boundaries plainly rather than implying the benefit is universal.
+
+**What it demonstrates about the endeavor.** The autonomous-finance architecture I
+published is implementable, its central coordination claim holds up under measurement
+and robustness checks, and the credit component is grounded in real loan outcomes. The
+build is also debuggable in the way real engineering is: an early version had a
+credit-agent failure that I diagnosed, corrected, and documented rather than hid.
+
+**Disclosure and limits (kept, not softened).** The credit-risk model is trained on
+**real** public data. The treasury environment in which the agents operate is a
+**calibrated simulation**, not observed data from a real firm -- this is stated in the
+abstract, in every figure caption that uses simulated data, and throughout. Further
+limits, stated as limits: only one class of small-business profile is modeled in depth;
+the credit labels are a proxy (SBA loan defaults standing in for trade-credit risk);
+and this is proof-of-concept scale, not a production system. These are detailed in
+section 7.
 
 ---
 
@@ -375,7 +435,8 @@ Figure 3 (`reports/figures/cash_trajectory.png`): representative 52-week cash
 trajectory (held-out evaluation episode 0) for one seed of each policy. No
 solvency breach markers appear because none of the four policies breached
 solvency in this episode (or in any of the 100 held-out episodes; section 5.3)
-under the current calibration.
+under the current calibration. *Simulated data: the cash trajectories come from the
+calibrated treasury environment (section 3.2), not from an observed firm.*
 
 ### 5.3 Policy comparison (headline)
 All values are mean +/- std over 5 training seeds (rule-based: a fixed heuristic,
@@ -421,11 +482,15 @@ reference. The y-axis is firm value rather than raw PPO reward because MAPPO's
 logged training reward includes the shared-reward term folded into each of the
 four agents while IPPO's and the single-agent baseline's do not, making raw
 reward not comparable across policies; firm value is reward-scheme-independent.
+*Simulated data: firm value is a simulated treasury outcome from the calibrated
+environment (section 3.2), not observed firm data.*
 
 ![Figure 4b: coordination-lift bar chart](figures/coordination_lift.png)
 
 Figure 4b (`reports/figures/coordination_lift.png`): the same headline combined
-objective as a bar chart with seed error bars.
+objective as a bar chart with seed error bars. *Simulated data: the combined objective
+is computed on the calibrated treasury simulation (section 3.2), not observed firm
+data.*
 
 Narrative: coordinated control (MAPPO) increased the combined objective by 8.97-9.22
 relative to every other policy (paired Wilcoxon p < 0.001 for all three comparisons,
@@ -532,7 +597,9 @@ episodes (`--env-config config/env_stress.yaml --tag stress`).
 ![Figure 7: stress-test summary](figures/stress_solvency.png)
 
 Figure 7 (`reports/figures/stress_solvency.png`): solvency-breach rate and combined
-objective by policy under Scenario E, mean +/- seed std.
+objective by policy under Scenario E, mean +/- seed std. *Simulated data: Scenario E is
+a pre-registered adverse regime of the calibrated treasury simulation (section 5.5), not
+observed firm data.*
 
 Narrative, with two honest findings that point in different directions. First, the
 stress test does what it was designed to: solvency became binding (the rule-based
@@ -595,7 +662,9 @@ directions, DR should beat zero-shot.
 ![Figure 8: cross-sector generalization](figures/generalization.png)
 
 Figure 8 (`reports/figures/generalization.png`): combined objective J by policy and
-sector, zero-shot vs domain-randomized (mean over 5 seeds x 100 episodes).
+sector, zero-shot vs domain-randomized (mean over 5 seeds x 100 episodes). *Simulated
+data: all four sector profiles are calibrated treasury simulations (section 5.6), not
+observed firm data.*
 
 Two honest findings. First, **the baseline coordinated policy transfers zero-shot to
 every sector without breaking**: MAPPO retains its large lead over IPPO, single-agent,
@@ -735,8 +804,9 @@ State plainly, in the body:
 - Data: exact SBA snapshot named above (section 3.1); `data/download_sba.py` fetches
   it from the URL pinned in `config/env.yaml` (`sba.csv_url`); SHA-256 checksum
   provided in section 3.1 and printed by the download script.
-- Code: not under version control at the time of writing (a local working
-  directory, not a git repository); pinned `requirements.txt` (exact package
+- Code: under Git version control in the repository `github.com/Prince-eu/sof-marl`
+  (private; access available to adjudicators on request), so every result in this
+  report is tied to a specific commit; pinned `requirements.txt` (exact package
   versions, including the Python 3.11 target and the note that `supersuit` was
   removed as unused, section 4.3); fixed training seed list `[0, 1, 2, 3, 4]`
   (`config/train.yaml`); fixed evaluation seeds `100000`-`100099`, disjoint from
@@ -753,7 +823,30 @@ State plainly, in the body:
 
 ---
 
-## 9. Conclusion
+## 9. Author attribution and ownership of the endeavor
+
+The underlying endeavor is the author's own. The four-agent autonomous-finance
+architecture demonstrated here originates in the author's peer-reviewed paper, Enyiorji
+(2025) (Exhibit C.2); the design of this prototype -- the choice of agents, the treasury
+state and dynamics, the reward and coordination structure, the credit-model formulation,
+the evaluation protocol, the pre-registered stress and sensitivity tests, and the
+cross-sector generalization study -- reflects the author's decisions and direction. The
+author defined what to measure, set the standard that every result (including null and
+unfavorable ones) be reported as measured, and diagnosed and directed the correction of
+the credit-agent failure documented in sections 5.3 and 7.
+
+Consistent with that same standard of honesty, the author discloses that the report and
+the underlying code were produced with AI coding assistance (Claude Code) working under
+the author's direction and specifications. The intellectual contribution -- the
+published architecture, the design decisions, the interpretation of results, and the
+commitment to report them faithfully -- is the author's; the assistant was a tool used
+to implement and document it, in the same way standard libraries and frameworks
+(PyTorch, Stable-Baselines3, XGBoost) were tools. The author owns and can defend the
+build, its results, and their limits.
+
+---
+
+## 10. Conclusion
 
 This POC implements the four-agent architecture of Enyiorji (2025) end to end: a
 real credit-risk model trained and validated on public SBA 7(a) loan outcomes
