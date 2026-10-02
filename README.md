@@ -20,15 +20,23 @@ single-agent controller, and independent multi-agent RL (IPPO).
 
 `reports/technical_report.pdf` is the full exhibit. Headline: on 100 shared,
 held-out evaluation episodes, MAPPO increased the pre-registered combined treasury
-objective by 9.45-9.51 over every other policy (mean over 5 training seeds, paired
+objective by 8.97-9.22 over every other policy (mean over 5 training seeds, paired
 Wilcoxon p < 0.001), stable across six calibration perturbations. The credit-risk
 model achieves a held-out ROC-AUC of 0.939 (0.622 on a feature-ablated, more
-conservative reading; see the report for why both numbers are reported). One
-important limitation, investigated and disclosed rather than hidden: the
-credit-risk agent converged to denying nearly every exposure under all three
-learned policies, so the measured MAPPO lift is attributable to the other three
-agents coordinating well, not to better credit decisions -- see report sections
-5.3 and 7.
+conservative reading, with a survival-analysis cross-check giving concordance 0.928;
+see the report for why all three are reported).
+
+The credit-risk agent is a documented engineering iteration, not a hidden flaw. In
+the initial run it collapsed to denying nearly every exposure under all three
+learned policies; we diagnosed the cause (a miscalibrated concentration penalty plus
+a delayed, swamped reward), redesigned the credit reward, and retrained. After the
+fix the agent learns a sensible risk threshold and the learned policies run credit
+books more profitable than the rule-based baseline (approval precision ~0.97,
+portfolio yield net of losses roughly double the baseline's). Because the modeled
+credit exposures are deliberately small relative to the balance sheet, the MAPPO
+coordination lift is still driven mainly by the liquidity and capital-allocation
+agents; credit is now a working, profitable component in every learned policy, but
+not the source of the headline lift. See report sections 5.1, 5.3, and 7.
 
 ## Quickstart
 
