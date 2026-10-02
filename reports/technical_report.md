@@ -3,8 +3,8 @@
 **Technical Report**
 
 Author: Prince Enyiorji\
-Version: 1.1\
-Date: 2026-07-28\
+Version: 3.0\
+Date: 2026-10-02\
 Code snapshot: under Git version control; public repository `github.com/Prince-eu/sof-marl`; see section 8\
 Data snapshot: SBA 7(a) FOIA, file `FOIA_7a_FY2010_FY2019_asof_260331.csv`, as of March 31, 2026, 545,753 rows
 
@@ -16,60 +16,54 @@ Data snapshot: SBA 7(a) FOIA, file `FOIA_7a_FY2010_FY2019_asof_260331.csv`, as o
 ## Executive summary
 
 *This is a proof of concept, not a finished or deployed product. This page is written
-to be read first, in plain language, by a non-specialist; every statement here is
-supported by the technical sections that follow, and nothing here is stronger than what
+to be read first, in plain language, by a non-specialist, and every statement on it is
+supported by the technical sections that follow. Nothing here is stronger than what
 those sections show.*
 
-**What was built.** A working software prototype of the four-agent autonomous-finance
-system I designed and published in Enyiorji (2025). Four specialized
-software agents -- one each for liquidity (cash), credit risk, expenditure (spending),
-and capital allocation (investment) -- jointly manage a small business's weekly money
-decisions across a one-year horizon, learning to coordinate rather than act in
-isolation. This prototype implements the architecture from my paper directly; it is the
-system I published, not a generic demonstration.
+The work is a running software prototype of the four-agent autonomous-finance system I
+designed and published in Enyiorji (2025). Four specialized software agents, one each
+for liquidity, credit risk, expenditure, and capital allocation, jointly manage a small
+business's weekly treasury decisions across a one-year horizon, learning to coordinate
+rather than act in isolation. It implements that published architecture directly; it is
+the system I published, not a generic demonstration.
 
-**What real data was used.** The credit-risk agent is trained on real, public U.S.
-government data: the Small Business Administration's 7(a) loan records (FOIA release,
-545,753 loans, https://data.sba.gov/en/dataset/7-a-504-foia). Each record contains the
-loan's actual outcome -- fully repaid or charged off. Because these are real outcomes,
-the model's accuracy is genuinely measurable rather than asserted.
+One half of the system runs on real data. The credit-risk agent is trained on the U.S.
+Small Business Administration's 7(a) loan records, a public FOIA release of 545,753
+loans in which each record carries the loan's actual outcome, fully repaid or charged
+off. Because these are real outcomes, the model's accuracy is genuinely measurable
+rather than asserted. The model separates repaid from charged-off loans well, with a
+held-out ROC-AUC of 0.94. I did not stop at that flattering figure. Most of its
+discriminating power comes from loan-term structure, and a more conservative reading
+that removes that feature drops the figure to 0.62, a normal and honest result on this
+kind of data. A separate survival-analysis cross-check, with a concordance of 0.93,
+confirms that the strong result is not merely an artifact of which loans the snapshot
+happens to include. I report all three numbers, not only the highest.
 
-**What was measured, and the honest result.**
+The other half of the system, the treasury environment in which the agents operate, is
+a calibrated simulation rather than observed data from a real firm, and it is labeled as
+such in the abstract, in every figure caption that uses simulated data, and throughout
+the report. On identical held-out test years, the coordinated four-agent system
+outperformed a rule-based heuristic, a single controller, and non-coordinated agents on
+a pre-registered treasury objective, by a margin that is statistically significant and
+stable across five independent training runs and across perturbations of the key
+assumptions. This supports the central claim of the paper, that coordination among the
+agents measurably helps.
 
-- *Credit model (real data).* The model separates repaid from charged-off loans well
-  (ROC-AUC 0.94). I did not stop at the flattering headline: most of that power comes
-  from loan-term structure, and a more conservative reading that removes that feature
-  drops accuracy to 0.62 -- a normal, honest number on this kind of data. A separate
-  survival-analysis cross-check (concordance 0.93) confirms the strong result is not
-  merely an artifact of which loans the snapshot includes. I report all three figures,
-  not just the highest.
-- *The multi-agent result (simulation).* On identical held-out test years, the
-  coordinated four-agent system outperformed a rule-based heuristic, a single
-  controller, and non-coordinated agents on a pre-registered treasury objective, by a
-  margin that is statistically significant and stable across five independent training
-  runs and across perturbations of the key assumptions. This supports the central claim
-  of my paper: coordination among the agents measurably helps.
-- *Where the benefit does and does not lie (honest scoping).* Under a deliberately harsh
-  downturn scenario, the learning-based policies protect the business from running out
-  of cash far better than the rule-based heuristic -- but on that specific survival
-  measure, coordinated and non-coordinated agents tie; coordination's measured edge is
-  on growing firm value, not on avoiding insolvency. And across four different business
-  types, the coordinated policy already transfers well without special retraining. I
-  state these boundaries plainly rather than implying the benefit is universal.
+I am equally clear about where that benefit does not lie. Under a deliberately harsh
+downturn scenario the learning-based policies protect the business from running out of
+cash far better than the rule-based heuristic, yet on that specific survival measure the
+coordinated and non-coordinated agents tie, so coordination's measured edge is on
+growing firm value, not on avoiding insolvency. Across four different business types the
+coordinated policy already transfers well without special retraining. The build is also
+debuggable in the way real engineering is: an early version had a credit-agent failure
+that I diagnosed, corrected, and documented rather than hid.
 
-**What it demonstrates about the endeavor.** The autonomous-finance architecture I
-published is implementable, its central coordination claim holds up under measurement
-and robustness checks, and the credit component is grounded in real loan outcomes. The
-build is also debuggable in the way real engineering is: an early version had a
-credit-agent failure that I diagnosed, corrected, and documented rather than hid.
-
-**Disclosure and limits (kept, not softened).** The credit-risk model is trained on
-**real** public data. The treasury environment in which the agents operate is a
-**calibrated simulation**, not observed data from a real firm -- this is stated in the
-abstract, in every figure caption that uses simulated data, and throughout. Further
-limits, stated as limits: only one class of small-business profile is modeled in depth;
-the credit labels are a proxy (SBA loan defaults standing in for trade-credit risk);
-and this is proof-of-concept scale, not a production system. These are detailed in
+Taken together, the work demonstrates that the architecture I published is implementable,
+that its central coordination claim holds up under measurement and robustness checks, and
+that the credit component is grounded in real loan outcomes. The honest limits remain in
+view. Only one class of small-business profile is modeled in depth, the credit labels are
+a proxy in which SBA loan defaults stand in for trade-credit risk, and this is
+proof-of-concept scale rather than a production system. Those limits are detailed in
 section 7.
 
 <div class="pagebreak"></div>
@@ -142,6 +136,41 @@ regulatory certification or production MLOps; large-scale hyperparameter search.
 The architecture follows Enyiorji (2025), *Designing a Self-Optimizing Cloud-Native
 Autonomous Finance System for SMEs Using Multi-Agent Reinforcement Learning*. This
 report implements a scoped subset sufficient to test the core claim.
+
+### 1.4 What this exhibit depends on
+This exhibit does not stand alone. Its credibility rests on a small number of external
+foundations, each identified here so a reader can weigh them directly.
+
+- **The architecture.** The four-agent design originates in the author's peer-reviewed
+  paper, Enyiorji (2025), *Designing a Self-Optimizing Cloud-Native Autonomous Finance
+  System for SMEs Using Multi-Agent Reinforcement Learning*, International Journal of
+  Financial Management and Economics, 8(1), 596 to 605. That publication is introduced
+  and supported in Exhibits C.1 and C.2; the present exhibit implements and tests the
+  design it describes.
+- **The real credit data.** Every claim that this work uses real data rests on one
+  public source: the U.S. Small Business Administration 7(a) FOIA loan-outcome dataset
+  (data.sba.gov), public-domain U.S. government open data. The credit-risk model is
+  trained and evaluated entirely on it, and the exact snapshot is pinned by filename,
+  date, row count, and SHA-256 checksum (section 3.1).
+- **The calibration statistics.** The simulated treasury environment is anchored to
+  public U.S. federal statistics rather than to private or invented figures: the Federal
+  Reserve bank prime loan rate (FRED series MPRIME) for financing-cost levels, the
+  JPMorgan Chase Institute cash-buffer-days study for the liquidity target, and the
+  Federal Reserve Small Business Credit Survey together with the SBA Office of Advocacy
+  for small-business population and financing context (section 3.2).
+- **The methods.** The modeling and learning techniques are established, peer-reviewed
+  building blocks rather than novel unvalidated algorithms: XGBoost for the credit model,
+  SHAP for interpretability, an XGBoost accelerated-failure-time model for the survival
+  cross-check, and proximal policy optimization with generalized advantage estimation for
+  the agents, implemented on the PettingZoo and Stable-Baselines3 frameworks (full
+  citations in the References). The correctness of the exhibit therefore does not depend
+  on any method the field has not already vetted.
+
+In short, beyond the author's own published architecture the exhibit depends on real U.S.
+government data, public federal statistics, and standard peer-reviewed methods. The one
+dependency that is the author's own work, the architecture, is established in Exhibits
+C.1 and C.2; the remaining dependencies are authoritative public sources a reviewer can
+check independently.
 
 ---
 
